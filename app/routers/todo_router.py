@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db, get_current_user
@@ -37,12 +37,22 @@ async def add_todo(
     response_model=list[todo_schema.TodoResponse]
 )
 async def get_all_todos(
+        limit: int = Query(10, ge=1, le=100),
+        offset: int = Query(0, ge=0),
+        is_done: bool | None = None,
+        sort_by: str = "created_at",
+        order: str = "desc",
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
     return await get_todos(
         current_user,
-        db
+        db,
+        limit,
+        offset,
+        is_done,
+        sort_by,
+        order
     )
 
 @router.get(

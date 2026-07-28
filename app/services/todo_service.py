@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from  sqlalchemy import select
+from sqlalchemy import select, asc, desc
 
 from app.models.todo_model import ToDo
 from app.models.user_model import User
@@ -28,13 +28,43 @@ async def create_todo(
 
 async def get_todos(
         user,
-        db
+        db,
+        limit: int = 10,
+        offset: int = 0,
+        is_done: bool | None = None,
+        sort_by: str = "created_at",
+        order: str = "desc"
 ):
-    result = await db.execute(
-        select(ToDo).where(
-            ToDo.user_id == user.id
-        )
+
+    query = select(ToDo).where(
+        ToDo.user_id == user.id
     )
+
+    # фильтр
+    if is_done is not None:
+        query = query.where(
+            ToDo.is_done == is_done
+        )
+
+    # сортировка
+    if sort_by == "title":
+        column = ToDo.title
+    else:
+        column = ToDo.created_at
+
+    if order == "asc":
+        query = query.order_by(
+            asc(column)
+        )
+    else:
+        query = query.order_by(
+            desc(column)
+        )
+
+    # пагинация
+    query = query.limit(limit).offset(offset)
+
+    result = await db.execute(query)
 
     return result.scalars().all()
 
