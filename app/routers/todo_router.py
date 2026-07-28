@@ -1,0 +1,90 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.dependencies import get_db, get_current_user
+from app.models.user_model import User
+from app.schemas import todo_schema
+from app.services.todo_service import (create_todo,
+                                       get_todos,
+                                       get_todo_by_id,
+                                       update_todo,
+                                       delete_todo)
+
+
+router = APIRouter(
+    prefix="/todos",
+    tags=["Todos"]
+)
+
+
+@router.post(
+    "/",
+    response_model=todo_schema.TodoResponse
+)
+async def add_todo(
+        todo: todo_schema.TodoCreate,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    return await create_todo(
+        todo,
+        current_user,
+        db
+    )
+
+@router.get(
+    "/",
+    response_model=list[todo_schema.TodoResponse]
+)
+async def get_all_todos(
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    return await get_todos(
+        current_user,
+        db
+    )
+
+@router.get(
+    "/{todo_id}",
+    response_model=todo_schema.TodoResponse
+)
+async def get_todo(
+        todo_id: int,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    return await get_todo_by_id(
+        todo_id,
+        current_user,
+        db
+    )
+
+@router.patch(
+    "/{todo_id}",
+    response_model=todo_schema.TodoResponse
+)
+async def patch_todo(
+        todo_id: int,
+        todo: todo_schema.TodoUpdate,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    return await update_todo(
+        todo_id,
+        todo,
+        current_user,
+        db
+    )
+
+@router.delete("/{todo_id}")
+async def remove_todo(
+        todo_id: int,
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user)
+):
+    return await delete_todo(
+        todo_id,
+        current_user,
+        db
+    )
