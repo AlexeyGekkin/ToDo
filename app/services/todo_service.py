@@ -6,13 +6,6 @@ from app.models.todo_model import ToDo
 from app.models.user_model import User
 from app.schemas.todo_schema import TodoCreate, TodoUpdate
 
-SORT_FIELDS = {
-    "id": ToDo.id,
-    "title": ToDo.title,
-    "is_done": ToDo.is_done,
-    "created_at": ToDo.created_at,
-}
-
 async def create_todo(
         todo_data: TodoCreate,
         user: User,
@@ -40,17 +33,31 @@ async def get_todos(
         sort_by: str = "created_at",
         order: str = "desc"
 ):
-    query = select(ToDo).where(ToDo.user_id == user.id)
+    sort_fields = {
+        "id": ToDo.id,
+        "title": ToDo.title,
+        "is_done": ToDo.is_done,
+        "created_at": ToDo.created_at,
+    }
 
+    if sort_by not in sort_fields:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Недопустимое поле для сортировки. Разрешены: {list(sort_fields.keys())}"
+        )
+    query = select(ToDo).where(ToDo.user_id == user.id)
+    column = sort_fields[sort_by]
+    sort_func = desc if order == "desc" else asc
+    query = query.order_by(sort_func(column))
     # Фильтрация по статусу
     if is_done is not None:
         query = query.where(ToDo.is_done == is_done)
 
     # Проверка поля сортировки
-    if sort_by not in SORT_FIELDS:
+    if sort_by not in sort_fields:
         raise HTTPException(
             status_code=400,
-            detail=f"Недопустимое поле для сортировки. Разрешены: {list(SORT_FIELDS.keys())}"
+            detail=f"Недопустимое поле для сортировки. Разрешены: {list(sort_fields.keys())}"
         )
 
     # Проверка направления
@@ -60,7 +67,7 @@ async def get_todos(
             detail="Параметр order должен быть 'asc' или 'desc'"
         )
 
-    column = SORT_FIELDS[sort_by]
+    column = sort_fields[sort_by]
     sort_func = desc if order == "desc" else asc
     query = query.order_by(sort_func(column))
 

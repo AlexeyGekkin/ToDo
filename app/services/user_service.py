@@ -53,19 +53,11 @@ async def authenticate_user(
 
     db_user = result.scalar_one_or_none()
 
-    if not db_user:
+    if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(
-            status_code=400,
-            detail="Invalid credentials"
-        )
-
-    if not verify_password(
-            user.password,
-            db_user.password
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid credentials"
+            status_code=401,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     token = create_access_token(
