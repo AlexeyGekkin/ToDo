@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, asc, desc
 
@@ -7,6 +6,12 @@ from app.models.todo_model import ToDo
 from app.models.user_model import User
 from app.schemas.todo_schema import TodoCreate, TodoUpdate
 
+SORT_FIELDS = {
+    "id": ToDo.id,
+    "title": ToDo.title,
+    "is_done": ToDo.is_done,
+    "created_at": ToDo.created_at,
+}
 
 async def create_todo(
         todo_data: TodoCreate,
@@ -27,45 +32,42 @@ async def create_todo(
     return todo
 
 async def get_todos(
-        user,
-        db,
+        user: User,
+        db: AsyncSession,
         limit: int = 10,
         offset: int = 0,
         is_done: bool | None = None,
         sort_by: str = "created_at",
         order: str = "desc"
 ):
+    query = select(ToDo).where(ToDo.user_id == user.id)
 
-    query = select(ToDo).where(
-        ToDo.user_id == user.id
-    )
-
-    # фильтр
+    # Фильтрация по статусу
     if is_done is not None:
-        query = query.where(
-            ToDo.is_done == is_done
+        query = query.where(ToDo.is_done == is_done)
+
+    # Проверка поля сортировки
+    if sort_by not in SORT_FIELDS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Недопустимое поле для сортировки. Разрешены: {list(SORT_FIELDS.keys())}"
         )
 
-    # сортировка
-    if sort_by == "title":
-        column = ToDo.title
-    else:
-        column = ToDo.created_at
-
-    if order == "asc":
-        query = query.order_by(
-            asc(column)
-        )
-    else:
-        query = query.order_by(
-            desc(column)
+    # Проверка направления
+    if order not in ("asc", "desc"):
+        raise HTTPException(
+            status_code=400,
+            detail="Параметр order должен быть 'asc' или 'desc'"
         )
 
-    # пагинация
+    column = SORT_FIELDS[sort_by]
+    sort_func = desc if order == "desc" else asc
+    query = query.order_by(sort_func(column))
+
+    # Пагинация
     query = query.limit(limit).offset(offset)
 
     result = await db.execute(query)
-
     return result.scalars().all()
 
 async def get_todo_by_id(

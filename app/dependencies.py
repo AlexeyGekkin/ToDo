@@ -6,8 +6,7 @@ from jose import JWTError, jwt
 
 from app.database import SessionLocal
 from app import models
-from app.services.auth_service import SECRET_KEY, ALGORITHM
-
+from app.config import SECRET_KEY, ALGORITHM
 
 security = HTTPBearer()
 
@@ -32,7 +31,7 @@ async def get_current_user(
 
         user_id: str = payload.get("sub")
 
-        if user_id is None:
+        if user_id is None or not user_id.isdigit():
             raise HTTPException(
                 status_code=401,
                 detail="Invalid token"

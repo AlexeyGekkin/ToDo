@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict
 
 
 class TodoCreate(BaseModel):
@@ -11,9 +12,10 @@ class TodoResponse(BaseModel):
     title: str
     description: str | None
     is_done: bool
+    created_at: datetime  # Добавили поле времени
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class TodoUpdate(BaseModel):
     title: str | None = None
