@@ -19,10 +19,10 @@ router = APIRouter(
 
 @router.post(
     "/",
-    response_model=todo_schema.TodoResponse
+    response_model=todo_schema.ToDoResponse
 )
 async def add_todo(
-        todo: todo_schema.TodoCreate,
+        todo: todo_schema.ToDoCreate,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
@@ -34,7 +34,7 @@ async def add_todo(
 
 @router.get(
     "/",
-    response_model=list[todo_schema.TodoResponse]
+    response_model=list[todo_schema.ToDoResponse]
 )
 async def get_all_todos(
         limit: int = Query(10, ge=1, le=100),
@@ -57,7 +57,7 @@ async def get_all_todos(
 
 @router.get(
     "/{todo_id}",
-    response_model=todo_schema.TodoResponse
+    response_model=todo_schema.ToDoResponse
 )
 async def get_todo(
         todo_id: int,
@@ -72,11 +72,11 @@ async def get_todo(
 
 @router.patch(
     "/{todo_id}",
-    response_model=todo_schema.TodoResponse
+    response_model=todo_schema.ToDoResponse
 )
 async def patch_todo(
         todo_id: int,
-        todo: todo_schema.TodoUpdate,
+        todo: todo_schema.ToDoUpdate,
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):

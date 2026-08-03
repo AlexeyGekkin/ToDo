@@ -4,10 +4,10 @@ from sqlalchemy import select, asc, desc
 
 from app.models.todo_model import ToDo
 from app.models.user_model import User
-from app.schemas.todo_schema import TodoCreate, TodoUpdate
+from app.schemas.todo_schema import ToDoCreate, ToDoUpdate
 
 async def create_todo(
-        todo_data: TodoCreate,
+        todo_data: ToDoCreate,
         user: User,
         db: AsyncSession
 ):
@@ -95,7 +95,7 @@ async def get_todo_by_id(
 
 async def update_todo(
         todo_id: int,
-        todo_data: TodoUpdate,
+        todo_data: ToDoUpdate,
         user: User,
         db: AsyncSession
 ):

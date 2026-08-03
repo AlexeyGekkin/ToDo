@@ -10,6 +10,12 @@ class ToDoCreate(BaseModel):
     due_date: Optional[datetime] = None
     reminder_type: Optional[ReminderType] = None
 
+class ToDoUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    completed: Optional[bool] = None
+    due_date: Optional[datetime] = None
+    reminder_type: Optional[ReminderType] = None
 
 class ToDoResponse(BaseModel):
     id: int
