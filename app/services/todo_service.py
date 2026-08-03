@@ -6,37 +6,40 @@ from app.models.todo_model import ToDo
 from app.models.user_model import User
 from app.schemas.todo_schema import ToDoCreate, ToDoUpdate
 
+
 async def create_todo(
-        todo_data: ToDoCreate,
-        user: User,
-        db: AsyncSession
+    todo_data: ToDoCreate,
+    user: User,
+    db: AsyncSession
 ):
     todo = ToDo(
         title=todo_data.title,
         description=todo_data.description,
+        due_date=todo_data.due_date,
+        reminder_type=todo_data.reminder_type,
         user_id=user.id
     )
 
     db.add(todo)
-
     await db.commit()
     await db.refresh(todo)
 
     return todo
 
+
 async def get_todos(
-        user: User,
-        db: AsyncSession,
-        limit: int = 10,
-        offset: int = 0,
-        is_done: bool | None = None,
-        sort_by: str = "created_at",
-        order: str = "desc"
+    user: User,
+    db: AsyncSession,
+    limit: int = 10,
+    offset: int = 0,
+    is_done: bool | None = None,
+    sort_by: str = "created_at",
+    order: str = "desc"
 ):
     sort_fields = {
         "id": ToDo.id,
         "title": ToDo.title,
-        "is_done": ToDo.is_done,
+        "is_done": ToDo.completed,
         "created_at": ToDo.created_at,
     }
 
@@ -56,9 +59,9 @@ async def get_todos(
     # 2. Базовый запрос
     query = select(ToDo).where(ToDo.user_id == user.id)
 
-    # 3. Фильтрация
+    # 3. Фильтрация по статусу выполнения
     if is_done is not None:
-        query = query.where(ToDo.is_done == is_done)
+        query = query.where(ToDo.completed == is_done)
 
     # 4. Сортировка
     column = sort_fields[sort_by]
@@ -71,10 +74,11 @@ async def get_todos(
     result = await db.execute(query)
     return result.scalars().all()
 
+
 async def get_todo_by_id(
-        todo_id: int,
-        user: User,
-        db: AsyncSession
+    todo_id: int,
+    user: User,
+    db: AsyncSession
 ):
     result = await db.execute(
         select(ToDo).where(
@@ -93,11 +97,12 @@ async def get_todo_by_id(
 
     return todo
 
+
 async def update_todo(
-        todo_id: int,
-        todo_data: ToDoUpdate,
-        user: User,
-        db: AsyncSession
+    todo_id: int,
+    todo_data: ToDoUpdate,
+    user: User,
+    db: AsyncSession
 ):
     result = await db.execute(
         select(ToDo).where(
@@ -124,10 +129,11 @@ async def update_todo(
 
     return todo
 
+
 async def delete_todo(
-        todo_id: int,
-        user: User,
-        db: AsyncSession
+    todo_id: int,
+    user: User,
+    db: AsyncSession
 ):
     result = await db.execute(
         select(ToDo).where(
@@ -147,6 +153,4 @@ async def delete_todo(
     await db.delete(todo)
     await db.commit()
 
-    return {
-        "message": "Todo deleted"
-    }
+    return {"message": "Todo deleted"}
