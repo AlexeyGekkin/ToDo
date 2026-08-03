@@ -16,6 +16,12 @@ router = APIRouter(
     tags=["Users"]
 )
 
+@router.get("/telegram/link-url")
+async def get_telegram_link(current_user: User = Depends(get_current_user)):
+    # Генерируем временный токен или передаем ID пользователя прямо в параметр start
+    # Например, используем user.id или временный uuid
+    link = f"https://t.me/Gekkin_Alexey_notification_bot?start={current_user.id}"
+    return {"link": link}
 
 @router.get("/me", response_model=schemas.UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):

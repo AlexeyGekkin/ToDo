@@ -1,23 +1,24 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from typing import Optional
+from pydantic import BaseModel
+from app.models.todo_model import ReminderType
 
 
-class TodoCreate(BaseModel):
+class ToDoCreate(BaseModel):
     title: str
-    description: str | None = None
+    description: Optional[str] = None
+    due_date: Optional[datetime] = None
+    reminder_type: Optional[ReminderType] = None
 
 
-class TodoResponse(BaseModel):
+class ToDoResponse(BaseModel):
     id: int
     title: str
-    description: str | None
-    is_done: bool
-    created_at: datetime  # Добавили поле времени
+    description: Optional[str] = None
+    completed: bool
+    due_date: Optional[datetime] = None
+    reminder_type: Optional[ReminderType] = None
+    user_id: int
 
-    model_config = ConfigDict(from_attributes=True)
-
-
-class TodoUpdate(BaseModel):
-    title: str | None = None
-    description: str | None = None
-    is_done: bool | None = None
+    class Config:
+        from_attributes = True

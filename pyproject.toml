@@ -3,6 +3,9 @@ name = "todo"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "aiogram>=3.30.0",
+    "aiohttp-socks>=0.11.0",
     "alembic>=1.18.5",
     "asyncpg>=0.31.0",
+    "dotenv>=0.9.9",
 ]

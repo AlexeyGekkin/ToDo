@@ -1,8 +1,16 @@
+import enum
 from datetime import datetime
-from sqlalchemy import String, ForeignKey, DateTime, func
+from typing import Optional
+from sqlalchemy import String, DateTime, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+
+class ReminderType(str, enum.Enum):
+    MORNING = "morning"
+    DEADLINE = "deadline"
+    BOTH = "both"
 
 
 class ToDo(Base):
@@ -10,14 +18,12 @@ class ToDo(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
-    description: Mapped[str | None] = mapped_column(String, nullable=True)
-    is_done: Mapped[bool] = mapped_column(default=False)
+    description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    completed: Mapped[bool] = mapped_column(default=False, server_default="false", nullable=False)
+    due_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    reminder_type: Mapped[Optional[ReminderType]] = mapped_column(
+        Enum(ReminderType), nullable=True
+    )
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-
     user: Mapped["User"] = relationship("User", back_populates="todos")
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now()
-    )
