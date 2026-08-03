@@ -40,38 +40,32 @@ async def get_todos(
         "created_at": ToDo.created_at,
     }
 
-    if sort_by not in sort_fields:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Недопустимое поле для сортировки. Разрешены: {list(sort_fields.keys())}"
-        )
-    query = select(ToDo).where(ToDo.user_id == user.id)
-    column = sort_fields[sort_by]
-    sort_func = desc if order == "desc" else asc
-    query = query.order_by(sort_func(column))
-    # Фильтрация по статусу
-    if is_done is not None:
-        query = query.where(ToDo.is_done == is_done)
-
-    # Проверка поля сортировки
+    # 1. Валидация входных параметров
     if sort_by not in sort_fields:
         raise HTTPException(
             status_code=400,
             detail=f"Недопустимое поле для сортировки. Разрешены: {list(sort_fields.keys())}"
         )
 
-    # Проверка направления
     if order not in ("asc", "desc"):
         raise HTTPException(
             status_code=400,
             detail="Параметр order должен быть 'asc' или 'desc'"
         )
 
+    # 2. Базовый запрос
+    query = select(ToDo).where(ToDo.user_id == user.id)
+
+    # 3. Фильтрация
+    if is_done is not None:
+        query = query.where(ToDo.is_done == is_done)
+
+    # 4. Сортировка
     column = sort_fields[sort_by]
     sort_func = desc if order == "desc" else asc
     query = query.order_by(sort_func(column))
 
-    # Пагинация
+    # 5. Пагинация
     query = query.limit(limit).offset(offset)
 
     result = await db.execute(query)
