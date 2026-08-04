@@ -1,21 +1,46 @@
+from datetime import datetime, time
+from typing import Optional
+
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, asc, desc
 
-from app.models.todo_model import ToDo
+from app.models.todo_model import ToDo, ReminderType
 from app.models.user_model import User
 from app.schemas.todo_schema import ToDoCreate, ToDoUpdate
 
 
+def calculate_remind_at(
+        target_date: Optional[datetime.date],
+        deadline_time: Optional[time],
+        reminder_type: ReminderType,
+) -> Optional[datetime]:
+    if not target_date or reminder_type == ReminderType.NONE:
+        return None
+
+    if reminder_type in (ReminderType.DEADLINE, ReminderType.BOTH) and deadline_time:
+        return datetime.combine(target_date, deadline_time)
+    elif reminder_type == ReminderType.MORNING:
+        return datetime.combine(target_date, time(9, 0))
+
+    return None
+
+
 async def create_todo(
-    todo_data: ToDoCreate,
-    user: User,
-    db: AsyncSession
+        todo_data: ToDoCreate,
+        user: User,
+        db: AsyncSession
 ):
+    remind_at = todo_data.remind_at or calculate_remind_at(
+        todo_data.target_date, todo_data.deadline_time, todo_data.reminder_type
+    )
+
     todo = ToDo(
         title=todo_data.title,
         description=todo_data.description,
-        due_date=todo_data.due_date,
+        target_date=todo_data.target_date,
+        deadline_time=todo_data.deadline_time,
+        remind_at=remind_at,
         reminder_type=todo_data.reminder_type,
         user_id=user.id
     )
@@ -28,13 +53,13 @@ async def create_todo(
 
 
 async def get_todos(
-    user: User,
-    db: AsyncSession,
-    limit: int = 10,
-    offset: int = 0,
-    is_done: bool | None = None,
-    sort_by: str = "created_at",
-    order: str = "desc"
+        user: User,
+        db: AsyncSession,
+        limit: int = 10,
+        offset: int = 0,
+        is_done: bool | None = None,
+        sort_by: str = "created_at",
+        order: str = "desc"
 ):
     sort_fields = {
         "id": ToDo.id,
@@ -76,9 +101,9 @@ async def get_todos(
 
 
 async def get_todo_by_id(
-    todo_id: int,
-    user: User,
-    db: AsyncSession
+        todo_id: int,
+        user: User,
+        db: AsyncSession
 ):
     result = await db.execute(
         select(ToDo).where(
@@ -99,10 +124,10 @@ async def get_todo_by_id(
 
 
 async def update_todo(
-    todo_id: int,
-    todo_data: ToDoUpdate,
-    user: User,
-    db: AsyncSession
+        todo_id: int,
+        todo_data: ToDoUpdate,
+        user: User,
+        db: AsyncSession
 ):
     result = await db.execute(
         select(ToDo).where(
@@ -124,6 +149,12 @@ async def update_todo(
     for key, value in data.items():
         setattr(todo, key, value)
 
+    # Пересчитываем remind_at, если изменились ключевые поля даты/времени
+    if any(k in data for k in ("target_date", "deadline_time", "reminder_type")):
+        todo.remind_at = calculate_remind_at(
+            todo.target_date, todo.deadline_time, todo.reminder_type
+        )
+
     await db.commit()
     await db.refresh(todo)
 
@@ -131,9 +162,9 @@ async def update_todo(
 
 
 async def delete_todo(
-    todo_id: int,
-    user: User,
-    db: AsyncSession
+        todo_id: int,
+        user: User,
+        db: AsyncSession
 ):
     result = await db.execute(
         select(ToDo).where(

@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette import status
 
 from app import schemas
 
@@ -7,7 +9,7 @@ from app.dependencies import get_current_user, get_db
 from app.models import User
 from app.services.user_service import (
     register_user,
-    authenticate_user
+    authenticate_user, delete_user_account
 )
 
 
@@ -45,3 +47,25 @@ async def login(
         db: AsyncSession = Depends(get_db)
 ):
     return await authenticate_user(user, db)
+
+class DeleteAccountConfirm(BaseModel):
+    confirmation: str = Field(
+        ...,
+        description="Для подтверждения необходимо ввести 'DELETE'",
+        examples=["DELETE"],
+    )
+
+
+@router.delete("/me", status_code=status.HTTP_200_OK)
+async def delete_me(
+    payload: DeleteAccountConfirm,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if payload.confirmation != "DELETE":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Неверное слово подтверждения. Введите 'DELETE'.",
+        )
+
+    return await delete_user_account(current_user, db)

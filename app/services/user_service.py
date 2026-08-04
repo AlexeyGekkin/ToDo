@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app import models, schemas
+from app.models import User
 from app.services.auth_service import  (
     hash_password,
     verify_password,
@@ -70,3 +71,9 @@ async def authenticate_user(
         "access_token": token,
         "token_type": "bearer"
     }
+
+async def delete_user_account(user: User, db: AsyncSession) -> dict:
+
+    await db.delete(user)
+    await db.commit()
+    return {"status": "ok", "message": "Аккаунт и все данные успешно удалены."}

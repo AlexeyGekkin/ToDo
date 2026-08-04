@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, time
 from typing import Optional
 from pydantic import BaseModel
 from app.models.todo_model import ReminderType
@@ -7,23 +7,31 @@ from app.models.todo_model import ReminderType
 class ToDoCreate(BaseModel):
     title: str
     description: Optional[str] = None
-    due_date: Optional[datetime] = None
-    reminder_type: Optional[ReminderType] = None
+    target_date: Optional[date] = None
+    deadline_time: Optional[time] = None
+    remind_at: Optional[datetime] = None
+    reminder_type: ReminderType = ReminderType.NONE
+
 
 class ToDoUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
-    due_date: Optional[datetime] = None
+    target_date: Optional[date] = None
+    deadline_time: Optional[time] = None
+    remind_at: Optional[datetime] = None
     reminder_type: Optional[ReminderType] = None
+
 
 class ToDoResponse(BaseModel):
     id: int
     title: str
     description: Optional[str] = None
     completed: bool
-    due_date: Optional[datetime] = None
-    reminder_type: Optional[ReminderType] = None
+    target_date: Optional[date] = None
+    deadline_time: Optional[time] = None
+    remind_at: Optional[datetime] = None
+    reminder_type: ReminderType
     user_id: int
 
     class Config:
