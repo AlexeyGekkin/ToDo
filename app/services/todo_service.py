@@ -1,5 +1,4 @@
-from datetime import datetime, time
-from typing import Optional
+from datetime import date, datetime, time
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,19 +10,39 @@ from app.schemas.todo_schema import ToDoCreate, ToDoUpdate
 
 
 def calculate_remind_at(
-        target_date: Optional[datetime.date],
-        deadline_time: Optional[time],
+        target_date: date | None,
+        deadline_time: time | None,
         reminder_type: ReminderType,
-) -> Optional[datetime]:
+) -> datetime | None:
     if not target_date or reminder_type == ReminderType.NONE:
         return None
 
     if reminder_type in (ReminderType.DEADLINE, ReminderType.BOTH) and deadline_time:
         return datetime.combine(target_date, deadline_time)
-    elif reminder_type == ReminderType.MORNING:
+    if reminder_type == ReminderType.MORNING:
         return datetime.combine(target_date, time(9, 0))
 
     return None
+
+
+async def get_user_todo(
+    todo_id: int,
+    user: User,
+    db: AsyncSession,
+) -> ToDo:
+    result = await db.execute(
+        select(ToDo).where(
+            ToDo.id == todo_id,
+            ToDo.user_id == user.id
+        )
+    )
+    todo = result.scalar_one_or_none()
+    if not todo:
+        raise HTTPException(
+    status_code=404,
+    detail="Todo not found",
+)
+    return todo
 
 
 async def create_todo(
@@ -68,7 +87,6 @@ async def get_todos(
         "created_at": ToDo.created_at,
     }
 
-    # 1. Валидация входных параметров
     if sort_by not in sort_fields:
         raise HTTPException(
             status_code=400,
@@ -81,46 +99,19 @@ async def get_todos(
             detail="Параметр order должен быть 'asc' или 'desc'"
         )
 
-    # 2. Базовый запрос
     query = select(ToDo).where(ToDo.user_id == user.id)
 
-    # 3. Фильтрация по статусу выполнения
     if is_done is not None:
         query = query.where(ToDo.completed == is_done)
 
-    # 4. Сортировка
     column = sort_fields[sort_by]
     sort_func = desc if order == "desc" else asc
     query = query.order_by(sort_func(column))
 
-    # 5. Пагинация
     query = query.limit(limit).offset(offset)
 
     result = await db.execute(query)
     return result.scalars().all()
-
-
-async def get_todo_by_id(
-        todo_id: int,
-        user: User,
-        db: AsyncSession
-):
-    result = await db.execute(
-        select(ToDo).where(
-            ToDo.id == todo_id,
-            ToDo.user_id == user.id
-        )
-    )
-
-    todo = result.scalar_one_or_none()
-
-    if todo is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Todo not found"
-        )
-
-    return todo
 
 
 async def update_todo(
@@ -129,27 +120,14 @@ async def update_todo(
         user: User,
         db: AsyncSession
 ):
-    result = await db.execute(
-        select(ToDo).where(
-            ToDo.id == todo_id,
-            ToDo.user_id == user.id
-        )
-    )
 
-    todo = result.scalar_one_or_none()
-
-    if todo is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Todo not found"
-        )
+    todo = await get_user_todo(todo_id, user, db)
 
     data = todo_data.model_dump(exclude_unset=True)
 
     for key, value in data.items():
         setattr(todo, key, value)
 
-    # Пересчитываем remind_at, если изменились ключевые поля даты/времени
     if any(k in data for k in ("target_date", "deadline_time", "reminder_type")):
         todo.remind_at = calculate_remind_at(
             todo.target_date, todo.deadline_time, todo.reminder_type
@@ -166,20 +144,7 @@ async def delete_todo(
         user: User,
         db: AsyncSession
 ):
-    result = await db.execute(
-        select(ToDo).where(
-            ToDo.id == todo_id,
-            ToDo.user_id == user.id
-        )
-    )
-
-    todo = result.scalar_one_or_none()
-
-    if todo is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Todo not found"
-        )
+    todo = await get_user_todo(todo_id, user, db)
 
     await db.delete(todo)
     await db.commit()

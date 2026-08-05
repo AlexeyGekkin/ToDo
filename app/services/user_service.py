@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app import models, schemas
+from app.schemas import UserCreate
 from app.models import User
 from app.services.auth_service import  (
     hash_password,
@@ -11,17 +11,20 @@ from app.services.auth_service import  (
 )
 
 
+async def get_user_by_email(
+    email: str,
+    db: AsyncSession,
+) -> User | None:
+    result = await db.execute(
+        select(User).where(User.email == email)
+    )
+    return result.scalar_one_or_none()
+
 async def register_user(
-        user: schemas.UserCreate,
+        user: UserCreate,
         db: AsyncSession
 ):
-    result = await db.execute(
-        select(models.User).where(
-            models.User.email == user.email
-        )
-    )
-
-    existing_user = result.scalar_one_or_none()
+    existing_user = await get_user_by_email(user.email, db)
 
     if existing_user:
         raise HTTPException(
@@ -29,7 +32,7 @@ async def register_user(
             detail="Email already exists"
         )
 
-    new_user = models.User(
+    new_user = User(
         email=user.email,
         password=hash_password(user.password)
     )
@@ -43,16 +46,10 @@ async def register_user(
 
 
 async def authenticate_user(
-        user: schemas.UserCreate,
+        user: UserCreate,
         db: AsyncSession
 ):
-    result = await db.execute(
-        select(models.User).where(
-            models.User.email == user.email
-        )
-    )
-
-    db_user = result.scalar_one_or_none()
+    db_user = await get_user_by_email(user.email, db)
 
     if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(

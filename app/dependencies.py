@@ -5,10 +5,15 @@ from sqlalchemy import select
 from jose import JWTError, jwt
 
 from app.database import SessionLocal
-from app import models
+from app.models import User
 from app.config import SECRET_KEY, ALGORITHM
 
 security = HTTPBearer()
+
+credentials_exception = HTTPException(
+    status_code=401,
+    detail="Invalid token"
+)
 
 
 async def get_db():
@@ -29,29 +34,23 @@ async def get_current_user(
             algorithms=[ALGORITHM]
         )
 
-        user_id: str = payload.get("sub")
+        user_id = payload.get("sub")
 
         if user_id is None or not user_id.isdigit():
-            raise HTTPException(
-                status_code=401,
-                detail="Invalid token"
-            )
+            raise credentials_exception
 
     except JWTError:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid token"
-        )
+        raise credentials_exception
 
     result = await db.execute(
-        select(models.User).where(
-            models.User.id == int(user_id)
+        select(User).where(
+            User.id == int(user_id)
         )
     )
 
     user = result.scalar_one_or_none()
 
-    if user is None:
+    if not user:
         raise HTTPException(
             status_code=401,
             detail="User not found"
