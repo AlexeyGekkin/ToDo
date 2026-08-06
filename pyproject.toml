@@ -2,12 +2,45 @@
 name = "todo"
 version = "0.1.0"
 requires-python = ">=3.12"
+
 dependencies = [
+    # FastAPI
+    "fastapi>=0.116.1",
+    "uvicorn>=0.35.0",
+
+    # База данных
+    "sqlalchemy>=2.0.51",
+    "asyncpg>=0.31.0",
+    "aiosqlite>=0.22.1",
+    "alembic>=1.18.5",
+
+    "python-jose[cryptography]>=3.5.0",
+    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=4.3.0",
+
+    "pydantic>=2.13.4",
+    "email-validator>=2.3.0",
+
     "aiogram>=3.30.0",
     "aiohttp-socks>=0.11.0",
-    "alembic>=1.18.5",
-    "asyncpg>=0.31.0",
-    "dotenv>=0.9.9",
+
+    "httpx>=0.28.1",
+
+    # Шаблоны
     "jinja2>=3.1.6",
-    "ngrok>=1.7.0",
+
+    # Конфигурация
+    "python-dotenv>=1.2.2",
+
+    # Тестирование
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+
 ]
+
+[dependency-groups]
+dev = []
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

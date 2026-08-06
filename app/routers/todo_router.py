@@ -7,7 +7,7 @@ from app.schemas.todo_schema import ToDoCreate, ToDoResponse, ToDoUpdate
 from app.services.todo_service import (
     create_todo,
     get_todos,
-    get_todo_by_id,
+    get_user_todo,
     update_todo,
     delete_todo
 )
@@ -68,7 +68,7 @@ async def get_todo(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return await get_todo_by_id(
+    return await get_user_todo(
         todo_id,
         current_user,
         db
