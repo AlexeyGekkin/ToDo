@@ -1,6 +1,6 @@
 from datetime import date, datetime, time
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from app.models.todo_model import ReminderType
 
 
@@ -33,6 +33,4 @@ class ToDoResponse(BaseModel):
     remind_at: Optional[datetime] = None
     reminder_type: ReminderType
     user_id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
