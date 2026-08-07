@@ -1,139 +1,88 @@
-import json
-from datetime import date, datetime, time
-from typing import Optional
-from urllib.parse import parse_qs
+from fastapi import Depends, APIRouter
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from app.dependencies import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import SessionLocal
-from app.models import User
-from app.models.todo_model import ReminderType, ToDo
+from app.services.telegram_auth_service import validate_init_data
+from app.services.telegram_service import (
+    get_profile,
+    get_webapp_todos,
+    create_webapp_todo, update_webapp_todo, delete_webapp_account,
+)
+from app.schemas.telegram_schema import (
+    MiniAppToDoCreate,
+    TaskStatusUpdate,
+)
+
 
 router = APIRouter(
     prefix="/api/telegram",
     tags=["Telegram"]
 )
 
-class TaskStatusUpdate(BaseModel):
-    completed: bool
-
-
-class MiniAppToDoCreate(BaseModel):
-    title: str
-    description: Optional[str] = None
-    target_date: Optional[date] = None
-    deadline_time: Optional[time] = None
-    reminder_type: ReminderType = ReminderType.NONE
-    init_data: str
-
-
-def get_telegram_id(init_data: str) -> int:
-    try:
-        parsed = parse_qs(init_data)
-        user_data = json.loads(parsed["user"][0])
-        return user_data["id"]
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid init_data")
-
-
-
 @router.get("/profile")
-async def get_profile_webapp(init_data: str):
-    telegram_id = get_telegram_id(init_data)
-    async with SessionLocal() as session:
-        result = await session.execute(
-            select(User).where(User.telegram_id == telegram_id).options(selectinload(User.todos))
-        )
-        user = result.scalars().first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+async def get_profile_webapp(
+    init_data: str,
+    db: AsyncSession = Depends(get_db),
+):
+    telegram_id = validate_init_data(init_data)
 
-        total = len(user.todos)
-        active = len([t for t in user.todos if not t.completed])
-
-        return {
-            "email": user.email,
-            "active_count": active,
-            "completed_count": total - active,
-        }
+    return await get_profile(
+        telegram_id,
+        db
+    )
 
 @router.get("/todos")
-async def get_todos_for_webapp(init_data: str):
-    telegram_id = get_telegram_id(init_data)
-    async with SessionLocal() as session:
-        result = await session.execute(
-            select(User).where(User.telegram_id == telegram_id).options(selectinload(User.todos))
-        )
-        user = result.scalars().first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+async def get_todos_for_webapp(
+    init_data: str,
+    db: AsyncSession = Depends(get_db),
+):
+    telegram_id = validate_init_data(init_data)
 
-        return user.todos
-
+    return await get_webapp_todos(
+        telegram_id,
+        db,
+    )
 
 @router.post("/todos")
-async def create_todo_webapp(data: MiniAppToDoCreate):
-    telegram_id = get_telegram_id(data.init_data)
-    async with SessionLocal() as session:
-        result = await session.execute(select(User).where(User.telegram_id == telegram_id))
-        user = result.scalars().first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+async def create_todo_webapp(
+    data: MiniAppToDoCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    telegram_id = validate_init_data(
+        data.init_data,
+    )
 
-        remind_at = None
-        if data.target_date:
-            if data.reminder_type in (ReminderType.DEADLINE, ReminderType.BOTH) and data.deadline_time:
-                remind_at = datetime.combine(data.target_date, data.deadline_time)
-            elif data.reminder_type == ReminderType.MORNING:
-                remind_at = datetime.combine(data.target_date, time(9, 0))
-
-        todo = ToDo(
-            title=data.title,
-            description=data.description,
-            target_date=data.target_date,
-            deadline_time=data.deadline_time,
-            remind_at=remind_at,
-            reminder_type=data.reminder_type,
-            user_id=user.id,
-        )
-        session.add(todo)
-        await session.commit()
-        await session.refresh(todo)
-        return {"status": "ok", "id": todo.id}
-
+    return await create_webapp_todo(
+        telegram_id,
+        data,
+        db,
+    )
 
 @router.patch("/todos/{todo_id}")
-async def update_todo_status(todo_id: int, status: TaskStatusUpdate, init_data: str):
-    telegram_id = get_telegram_id(init_data)
-    async with SessionLocal() as session:
-        result = await session.execute(
-            select(ToDo).join(User).where(ToDo.id == todo_id, User.telegram_id == telegram_id)
-        )
-        todo = result.scalars().first()
-        if not todo:
-            raise HTTPException(status_code=404, detail="Task not found")
+async def update_todo_status(
+    todo_id: int,
+    status: TaskStatusUpdate,
+    init_data: str,
+    db: AsyncSession = Depends(get_db),
+):
+    telegram_id = validate_init_data(init_data)
 
-        todo.completed = status.completed
-        await session.commit()
-        return {"status": "ok"}
-
-
-
+    return await update_webapp_todo(
+        telegram_id,
+        todo_id,
+        status.completed,
+        db,
+    )
 
 @router.delete("/account")
-async def delete_account_webapp(init_data: str):
-    telegram_id = get_telegram_id(init_data)
-    async with SessionLocal() as session:
-        result = await session.execute(
-            select(User).where(User.telegram_id == telegram_id)
-        )
-        user = result.scalars().first()
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+async def delete_account_webapp(
+    init_data: str,
+    db: AsyncSession = Depends(get_db),
+):
+    telegram_id = validate_init_data(init_data)
 
-        await session.delete(user)
-        await session.commit()
-        return {"status": "ok", "message": "Account deleted"}
+    return await delete_webapp_account(
+        telegram_id,
+        db,
+    )

@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -23,14 +23,14 @@ def create_app(with_bot: bool = True) -> FastAPI:
     app.include_router(telegram_router)
 
     @app.get("/", response_class=HTMLResponse)
-    async def root(request):
+    async def root(request: Request):
         return templates.TemplateResponse(
             request=request,
             name="index.html",
         )
 
     @app.get("/webapp", response_class=HTMLResponse)
-    async def webapp(request):
+    async def webapp(request: Request):
         return templates.TemplateResponse(
             request=request,
             name="index.html",
