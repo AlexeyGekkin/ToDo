@@ -26,7 +26,7 @@ def create_app(with_bot: bool = True) -> FastAPI:
     async def root(request: Request):
         return templates.TemplateResponse(
             request=request,
-            name="index.html",
+            name="browser.html",
         )
 
     @app.get("/webapp", response_class=HTMLResponse)

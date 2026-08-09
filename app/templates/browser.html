@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TODO App</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+            background: linear-gradient(135deg, #0f172a, #111827);
+            color: #f8fafc;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 30px 20px 50px;
+        }
+
+        .header {
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        label {
+            display: block;
+            margin: 14px 0 6px;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #f8fafc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #38bdf8;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .primary-btn {
+            width: 100%;
+            background: #0ea5e9;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #0284c7;
+        }
+
+        .secondary-btn {
+            width: 100%;
+            background: #334155;
+            color: white;
+        }
+
+        .secondary-btn:hover {
+            background: #475569;
+        }
+
+        .telegram-btn {
+            width: 100%;
+            background: #229ed9;
+            color: white;
+        }
+
+        .telegram-btn:hover {
+            background: #168ac0;
+        }
+
+        .logout-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #475569;
+            color: #cbd5e1;
+        }
+
+        .logout-btn:hover {
+            background: #1e293b;
+        }
+
+        .danger-btn {
+            width: 100%;
+            background: #dc2626;
+            color: white;
+        }
+
+        .danger-btn:hover {
+            background: #b91c1c;
+        }
+
+        .auth-title {
+            margin-top: 0;
+            margin-bottom: 6px;
+        }
+
+        .auth-subtitle {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .error {
+            color: #f87171;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .app-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .app-top h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .todo {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 17px;
+        }
+
+        .todo.completed {
+            opacity: 0.65;
+        }
+
+        .todo-title {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .todo.completed .todo-title {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        .todo-description {
+            margin-top: 7px;
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .todo-meta {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .todo-actions button {
+            margin: 0;
+            flex: 1;
+        }
+
+        .complete-btn {
+            background: #16a34a;
+            color: white;
+        }
+
+        .edit-btn {
+            background: #475569;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #7f1d1d;
+            color: white;
+        }
+
+        .deadline-fields {
+            margin-top: 10px;
+            padding: 12px;
+            background: #0f172a;
+            border-radius: 10px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px 15px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .danger-zone {
+            margin-top: 30px;
+            border-top: 1px solid #334155;
+            padding-top: 20px;
+        }
+
+        .danger-title {
+            color: #f87171;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .danger-text {
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 14px 40px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+            .card {
+                padding: 17px;
+            }
+
+            .app-top h2 {
+                font-size: 21px;
+            }
+
+            .todo-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>TODO App</h1>
+        <p>Управляйте своими задачами удобно</p>
+    </div>
+
+    <!-- AUTH -->
+
+    <div id="auth" class="card">
+
+        <h2 class="auth-title">
+            Вход в систему
+        </h2>
+
+        <p class="auth-subtitle">
+            Войдите или создайте новый аккаунт
+        </p>
+
+        <label for="email">Email</label>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="user@example.com"
+        >
+
+        <label for="password">Пароль</label>
+
+        <input
+            id="password"
+            type="password"
+            placeholder="Пароль"
+        >
+
+        <button
+            class="primary-btn"
+            onclick="login()"
+        >
+            Войти
+        </button>
+
+        <button
+            class="secondary-btn"
+            onclick="register()"
+        >
+            Зарегистрироваться
+        </button>
+
+        <p id="auth-error" class="error"></p>
+
+    </div>
+
+
+    <!-- APP -->
+
+    <div id="app" class="hidden">
+
+        <div class="app-top">
+            <h2>Мои задачи</h2>
+        </div>
+
+
+        <!-- TELEGRAM -->
+
+        <div class="card">
+
+            <button
+                class="telegram-btn"
+                onclick="linkTelegram()"
+            >
+                📱 Привязать Telegram
+            </button>
+
+            <button
+                class="logout-btn"
+                onclick="logout()"
+            >
+                Выйти
+            </button>
+
+        </div>
+
+
+        <!-- CREATE / EDIT -->
+
+        <div class="card">
+
+            <h3 id="todo-form-title">
+                Новая задача
+            </h3>
+
+            <label for="todo-title">
+                Название
+            </label>
+
+            <input
+                id="todo-title"
+                type="text"
+                placeholder="Например: Сдать отчёт"
+            >
+
+            <label for="todo-description">
+                Описание
+            </label>
+
+            <textarea
+                id="todo-description"
+                rows="3"
+                placeholder="Дополнительная информация"
+            ></textarea>
+
+            <label for="target-date">
+                Дата выполнения
+            </label>
+
+            <input
+                id="target-date"
+                type="date"
+            >
+
+            <label for="reminder-type">
+                Напоминание
+            </label>
+
+            <select id="reminder-type">
+
+                <option value="none">
+                    Без напоминания
+                </option>
+
+                <option value="morning">
+                    Утром в 09:00
+                </option>
+
+                <option value="deadline">
+                    В дедлайн
+                </option>
+
+                <option value="both">
+                    Утром и в дедлайн
+                </option>
+
+            </select>
+
+            <div
+                id="deadline-fields"
+                class="deadline-fields hidden"
+            >
+
+                <label for="deadline-date">
+                    Дата дедлайна
+                </label>
+
+                <input
+                    id="deadline-date"
+                    type="date"
+                >
+
+                <label for="deadline-time">
+                    Время дедлайна
+                </label>
+
+                <input
+                    id="deadline-time"
+                    type="time"
+                >
+
+            </div>
+
+            <button
+                id="todo-submit-btn"
+                class="primary-btn"
+                onclick="saveTodo()"
+            >
+                + Добавить задачу
+            </button>
+
+            <button
+                id="cancel-edit-btn"
+                class="secondary-btn hidden"
+                onclick="cancelEdit()"
+            >
+                Отмена
+            </button>
+
+        </div>
+
+
+        <!-- TODOS -->
+
+        <div class="card">
+
+            <h3>
+                Список задач
+            </h3>
+
+            <div
+                id="todo-list"
+                class="todo-list"
+            ></div>
+
+        </div>
+
+
+        <!-- DANGER ZONE -->
+
+        <div class="card">
+
+            <div class="danger-zone">
+
+                <div class="danger-title">
+                    Опасная зона
+                </div>
+
+                <div class="danger-text">
+                    Удаление аккаунта необратимо.
+                    Все задачи будут удалены.
+                </div>
+
+                <button
+                    class="danger-btn"
+                    onclick="deleteAccount()"
+                >
+                    💀 Удалить аккаунт
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    let editingTodoId = null;
+
+
+    // =========================
+    // TOKEN
+    // =========================
+
+    function getToken() {
+        return localStorage.getItem("access_token");
+    }
+
+
+    // =========================
+    // LOGIN
+    // =========================
+
+    async function login() {
+
+        const email =
+            document.getElementById("email").value;
+
+        const password =
+            document.getElementById("password").value;
+
+        const response = await fetch(
+            "/users/login",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            document.getElementById(
+                "auth-error"
+            ).textContent =
+                JSON.stringify(
+                    data.detail,
+                    null,
+                    2
+                );
+
+            return;
+        }
+
+        localStorage.setItem(
+            "access_token",
+            data.access_token
+        );
+
+        showApp();
+        loadTodos();
+    }
+
+
+    // =========================
+    // REGISTER
+    // =========================
+
+    async function register() {
+
+        const email =
+            document.getElementById("email").value;
+
+        const password =
+            document.getElementById("password").value;
+
+        const response = await fetch(
+            "/users/register",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            document.getElementById(
+                "auth-error"
+            ).textContent =
+                JSON.stringify(
+                    data.detail,
+                    null,
+                    2
+                );
+
+            return;
+        }
+
+        await login();
+    }
+
+
+    // =========================
+    // TELEGRAM
+    // =========================
+
+    async function linkTelegram() {
+
+        const response = await fetch(
+            "/users/telegram/link-url",
+            {
+                headers: {
+                    "Authorization":
+                        `Bearer ${getToken()}`
+                }
+            }
+        );
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                JSON.stringify(
+                    data.detail,
+                    null,
+                    2
+                )
+            );
+
+            return;
+        }
+
+        window.open(
+            data.link,
+            "_blank"
+        );
+    }
+
+
+    // =========================
+    // LOAD TODOS
+    // =========================
+
+    async function loadTodos() {
+
+        const response = await fetch(
+            "/todos/",
+            {
+                headers: {
+                    "Authorization":
+                        `Bearer ${getToken()}`
+                }
+            }
+        );
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        if (!response.ok) {
+            return;
+        }
+
+        const todos = await response.json();
+
+        const list =
+            document.getElementById(
+                "todo-list"
+            );
+
+        list.innerHTML = "";
+
+        if (todos.length === 0) {
+
+            list.innerHTML = `
+                <div class="empty">
+                    Задач пока нет 🎉
+                </div>
+            `;
+
+            return;
+        }
+
+        todos.forEach(todo => {
+
+            const div =
+                document.createElement("div");
+
+            div.className =
+                `todo ${
+                    todo.completed
+                        ? "completed"
+                        : ""
+                }`;
+
+            let meta = "";
+
+            if (todo.target_date) {
+                meta +=
+                    `📅 Выполнить: ${todo.target_date}<br>`;
+            }
+
+            if (todo.deadline_time) {
+                meta +=
+                    `⏰ Дедлайн: ${todo.deadline_time}<br>`;
+            }
+
+            if (
+                todo.reminder_type &&
+                todo.reminder_type !== "none"
+            ) {
+
+                const reminderNames = {
+                    morning:
+                        "Утреннее напоминание",
+
+                    deadline:
+                        "Напоминание в дедлайн",
+
+                    both:
+                        "Утреннее + дедлайн"
+                };
+
+                meta +=
+                    `🔔 ${
+                        reminderNames[
+                            todo.reminder_type
+                        ] ||
+                        todo.reminder_type
+                    }`;
+            }
+
+            div.innerHTML = `
+
+                <div class="todo-title">
+                    ${escapeHtml(todo.title)}
+                </div>
+
+                ${
+                    todo.description
+                        ? `
+                        <div class="todo-description">
+                            ${escapeHtml(
+                                todo.description
+                            )}
+                        </div>
+                        `
+                        : ""
+                }
+
+                ${
+                    meta
+                        ? `
+                        <div class="todo-meta">
+                            ${meta}
+                        </div>
+                        `
+                        : ""
+                }
+
+                <div class="todo-actions">
+
+                    <button
+                        class="complete-btn"
+                        onclick="
+                            toggleTodo(
+                                ${todo.id},
+                                ${!todo.completed}
+                            )
+                        "
+                    >
+                        ${
+                            todo.completed
+                                ? "↩ Вернуть"
+                                : "✓ Выполнить"
+                        }
+                    </button>
+
+                    <button
+                        class="edit-btn"
+                        onclick="
+                            editTodo(
+                                ${todo.id}
+                            )
+                        "
+                    >
+                        ✏️ Редактировать
+                    </button>
+
+                    <button
+                        class="delete-btn"
+                        onclick="
+                            deleteTodo(
+                                ${todo.id}
+                            )
+                        "
+                    >
+                        🗑 Удалить
+                    </button>
+
+                </div>
+            `;
+
+            list.appendChild(div);
+        });
+    }
+
+
+    // =========================
+    // CREATE / UPDATE TODO
+    // =========================
+
+    async function saveTodo() {
+
+        const title =
+            document.getElementById(
+                "todo-title"
+            ).value.trim();
+
+        const description =
+            document.getElementById(
+                "todo-description"
+            ).value.trim();
+
+        const targetDate =
+            document.getElementById(
+                "target-date"
+            ).value || null;
+
+        const reminderType =
+            document.getElementById(
+                "reminder-type"
+            ).value;
+
+        const deadlineDate =
+            document.getElementById(
+                "deadline-date"
+            ).value ||
+            targetDate;
+
+        const deadlineTime =
+            document.getElementById(
+                "deadline-time"
+            ).value || null;
+
+        if (!title) {
+
+            alert(
+                "Введите название задачи"
+            );
+
+            return;
+        }
+
+        const payload = {
+
+            title: title,
+
+            description:
+                description || null,
+
+            target_date:
+                targetDate,
+
+            deadline_date:
+                deadlineDate,
+
+            deadline_time:
+                deadlineTime,
+
+            reminder_type:
+                reminderType
+        };
+
+        let response;
+
+        if (editingTodoId !== null) {
+
+            response = await fetch(
+                `/todos/${editingTodoId}`,
+                {
+                    method: "PATCH",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            `Bearer ${getToken()}`
+                    },
+
+                    body: JSON.stringify(
+                        payload
+                    )
+                }
+            );
+
+        } else {
+
+            response = await fetch(
+                "/todos/",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            `Bearer ${getToken()}`
+                    },
+
+                    body: JSON.stringify(
+                        payload
+                    )
+                }
+            );
+        }
+
+        if (response.status === 401) {
+
+            logout();
+
+            return;
+        }
+
+        if (!response.ok) {
+
+            const data =
+                await response.json();
+
+            alert(
+                JSON.stringify(
+                    data.detail,
+                    null,
+                    2
+                )
+            );
+
+            return;
+        }
+
+        resetTodoForm();
+        loadTodos();
+    }
+
+
+    // =========================
+    // EDIT TODO
+    // =========================
+
+    function editTodo(id) {
+
+        fetch(
+            `/todos/${id}`,
+            {
+                headers: {
+                    "Authorization":
+                        `Bearer ${getToken()}`
+                }
+            }
+        )
+        .then(async response => {
+
+            if (response.status === 401) {
+                logout();
+                return null;
+            }
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            return await response.json();
+        })
+        .then(todo => {
+
+            if (!todo) {
+                return;
+            }
+
+            editingTodoId = todo.id;
+
+            document.getElementById(
+                "todo-form-title"
+            ).textContent =
+                "Редактирование задачи";
+
+            document.getElementById(
+                "todo-title"
+            ).value =
+                todo.title || "";
+
+            document.getElementById(
+                "todo-description"
+            ).value =
+                todo.description || "";
+
+            document.getElementById(
+                "target-date"
+            ).value =
+                todo.target_date || "";
+
+            document.getElementById(
+                "reminder-type"
+            ).value =
+                todo.reminder_type || "none";
+
+            document.getElementById(
+                "deadline-time"
+            ).value =
+                todo.deadline_time || "";
+
+            if (todo.remind_at) {
+
+                const date =
+                    new Date(todo.remind_at);
+
+                if (!isNaN(date)) {
+
+                    document.getElementById(
+                        "deadline-date"
+                    ).value =
+                        date.toISOString()
+                            .split("T")[0];
+                }
+            }
+
+            const showDeadline =
+                todo.reminder_type === "deadline" ||
+                todo.reminder_type === "both";
+
+            document.getElementById(
+                "deadline-fields"
+            ).classList.toggle(
+                "hidden",
+                !showDeadline
+            );
+
+            document.getElementById(
+                "todo-submit-btn"
+            ).textContent =
+                "💾 Сохранить изменения";
+
+            document.getElementById(
+                "cancel-edit-btn"
+            ).classList.remove(
+                "hidden"
+            );
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        })
+        .catch(() => {
+
+            alert(
+                "Не удалось загрузить задачу"
+            );
+        });
+    }
+
+
+    // =========================
+    // CANCEL EDIT
+    // =========================
+
+    function cancelEdit() {
+        resetTodoForm();
+    }
+
+
+    // =========================
+    // RESET FORM
+    // =========================
+
+    function resetTodoForm() {
+
+        editingTodoId = null;
+
+        document.getElementById(
+            "todo-form-title"
+        ).textContent =
+            "Новая задача";
+
+        document.getElementById(
+            "todo-submit-btn"
+        ).textContent =
+            "+ Добавить задачу";
+
+        document.getElementById(
+            "cancel-edit-btn"
+        ).classList.add(
+            "hidden"
+        );
+
+        document.getElementById(
+            "todo-title"
+        ).value = "";
+
+        document.getElementById(
+            "todo-description"
+        ).value = "";
+
+        document.getElementById(
+            "target-date"
+        ).value = "";
+
+        document.getElementById(
+            "deadline-date"
+        ).value = "";
+
+        document.getElementById(
+            "deadline-time"
+        ).value = "";
+
+        document.getElementById(
+            "reminder-type"
+        ).value = "none";
+
+        document.getElementById(
+            "deadline-fields"
+        ).classList.add(
+            "hidden"
+        );
+    }
+
+
+    // =========================
+    // REMINDER UI
+    // =========================
+
+    document
+        .getElementById("reminder-type")
+        .addEventListener(
+            "change",
+            function () {
+
+                const show =
+                    this.value === "deadline" ||
+                    this.value === "both";
+
+                document
+                    .getElementById(
+                        "deadline-fields"
+                    )
+                    .classList.toggle(
+                        "hidden",
+                        !show
+                    );
+            }
+        );
+
+
+    // =========================
+    // TOGGLE
+    // =========================
+
+    async function toggleTodo(
+        id,
+        completed
+    ) {
+
+        const response = await fetch(
+            `/todos/${id}`,
+            {
+                method: "PATCH",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "Authorization":
+                        `Bearer ${getToken()}`
+                },
+
+                body: JSON.stringify({
+                    completed: completed
+                })
+            }
+        );
+
+        if (response.status === 401) {
+
+            logout();
+
+            return;
+        }
+
+        if (response.ok) {
+            loadTodos();
+        }
+    }
+
+
+    // =========================
+    // DELETE TODO
+    // =========================
+
+    async function deleteTodo(id) {
+
+        if (
+            !confirm(
+                "Удалить задачу?"
+            )
+        ) {
+            return;
+        }
+
+        const response = await fetch(
+            `/todos/${id}`,
+            {
+                method: "DELETE",
+
+                headers: {
+                    "Authorization":
+                        `Bearer ${getToken()}`
+                }
+            }
+        );
+
+        if (response.status === 401) {
+
+            logout();
+
+            return;
+        }
+
+        if (response.ok) {
+            loadTodos();
+        }
+    }
+
+
+    // =========================
+    // DELETE ACCOUNT
+    // =========================
+
+    async function deleteAccount() {
+
+        const firstConfirm = confirm(
+            "ВНИМАНИЕ!\n\n" +
+            "Аккаунт будет удалён навсегда.\n" +
+            "Все ваши задачи также будут удалены.\n\n" +
+            "Продолжить?"
+        );
+
+        if (!firstConfirm) {
+            return;
+        }
+
+        const confirmation =
+            prompt(
+                "Для окончательного удаления аккаунта " +
+                "введите DELETE:"
+            );
+
+        if (confirmation !== "DELETE") {
+
+            alert(
+                "Удаление отменено. " +
+                "Необходимо ввести DELETE."
+            );
+
+            return;
+        }
+
+        const response = await fetch(
+            "/users/me",
+            {
+                method: "DELETE",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "Authorization":
+                        `Bearer ${getToken()}`
+                },
+
+                body: JSON.stringify({
+                    confirmation: "DELETE"
+                })
+            }
+        );
+
+        if (response.status === 401) {
+
+            logout();
+
+            return;
+        }
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                data.detail ||
+                "Ошибка при удалении аккаунта"
+            );
+
+            return;
+        }
+
+        alert(
+            "Аккаунт успешно удалён."
+        );
+
+        logout();
+    }
+
+
+    // =========================
+    // ESCAPE HTML
+    // =========================
+
+    function escapeHtml(text) {
+
+        const div =
+            document.createElement("div");
+
+        div.textContent = text;
+
+        return div.innerHTML;
+    }
+
+
+    // =========================
+    // SHOW APP
+    // =========================
+
+    function showApp() {
+
+        document.getElementById(
+            "auth"
+        ).classList.add(
+            "hidden"
+        );
+
+        document.getElementById(
+            "app"
+        ).classList.remove(
+            "hidden"
+        );
+    }
+
+
+    // =========================
+    // LOGOUT
+    // =========================
+
+    function logout() {
+
+        localStorage.removeItem(
+            "access_token"
+        );
+
+        resetTodoForm();
+
+        document.getElementById(
+            "app"
+        ).classList.add(
+            "hidden"
+        );
+
+        document.getElementById(
+            "auth"
+        ).classList.remove(
+            "hidden"
+        );
+    }
+
+
+    // =========================
+    // AUTO LOGIN
+    // =========================
+
+    if (getToken()) {
+
+        showApp();
+
+        loadTodos();
+    }
+
+</script>
+
+</body>
+</html>
+
