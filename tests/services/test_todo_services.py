@@ -11,46 +11,95 @@ from app.services.todo_service import (
     update_todo,
     delete_todo,
     get_todos,
-    calculate_remind_at,
+    calculate_remind_times,
 )
 from app.services.user_service import register_user
 from app.schemas.user_schema import UserCreate
 
-def test_calculate_remind_at_deadline():
 
-    result = calculate_remind_at(
+def test_calculate_remind_times_deadline():
+
+    morning_remind_at, deadline_remind_at = calculate_remind_times(
         date(2026, 8, 10),
         time(18, 30),
         ReminderType.DEADLINE,
     )
 
-    assert result == datetime(
-        2026, 8, 10, 18, 30
+    assert morning_remind_at is None
+    assert deadline_remind_at == datetime(
+        2026,
+        8,
+        10,
+        18,
+        30
     )
 
 
-def test_calculate_remind_at_morning():
+def test_calculate_remind_times_morning():
 
-    result = calculate_remind_at(
+    morning_remind_at, deadline_remind_at = calculate_remind_times(
         date(2026, 8, 10),
         None,
         ReminderType.MORNING,
     )
 
-    assert result == datetime(
-        2026, 8, 10, 9, 0
+    assert morning_remind_at == datetime(
+        2026,
+        8,
+        10,
+        9,
+        0
+    )
+    assert deadline_remind_at is None
+
+
+def test_calculate_remind_times_both():
+
+    morning_remind_at, deadline_remind_at = calculate_remind_times(
+        date(2026, 8, 10),
+        time(18, 30),
+        ReminderType.BOTH,
+    )
+
+    assert morning_remind_at == datetime(
+        2026,
+        8,
+        10,
+        9,
+        0
+    )
+    assert deadline_remind_at == datetime(
+        2026,
+        8,
+        10,
+        18,
+        30
     )
 
 
-def test_calculate_remind_at_none():
+def test_calculate_remind_times_none():
 
-    result = calculate_remind_at(
+    morning_remind_at, deadline_remind_at = calculate_remind_times(
         None,
         None,
-        ReminderType.DEADLINE,
+        ReminderType.NONE,
     )
 
-    assert result is None
+    assert morning_remind_at is None
+    assert deadline_remind_at is None
+
+
+def test_calculate_remind_times_without_date():
+
+    morning_remind_at, deadline_remind_at = calculate_remind_times(
+        None,
+        time(18, 30),
+        ReminderType.BOTH,
+    )
+
+    assert morning_remind_at is None
+    assert deadline_remind_at is None
+
 
 @pytest.mark.asyncio
 async def test_create_todo_service(db_session):
@@ -227,37 +276,3 @@ async def test_get_todos_service(db_session):
     )
 
     assert len(todos) == 2
-
-
-def test_calculate_remind_at_deadline():
-
-    result = calculate_remind_at(
-        date(2026, 8, 10),
-        time(18, 30),
-        ReminderType.DEADLINE
-    )
-
-    assert result == datetime(
-        2026,
-        8,
-        10,
-        18,
-        30
-    )
-
-
-def test_calculate_remind_at_morning():
-
-    result = calculate_remind_at(
-        date(2026, 8, 10),
-        None,
-        ReminderType.MORNING
-    )
-
-    assert result == datetime(
-        2026,
-        8,
-        10,
-        9,
-        0
-    )

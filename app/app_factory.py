@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app.lifespan import lifespan
 from app.routers import (
     user_router,
     todo_router,
@@ -13,6 +12,9 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 def create_app(with_bot: bool = True) -> FastAPI:
+    if with_bot:
+        from app.lifespan import lifespan
+
     app = FastAPI(
         title="TODO App",
         lifespan=lifespan if with_bot else None,
@@ -37,3 +39,4 @@ def create_app(with_bot: bool = True) -> FastAPI:
         )
 
     return app
+

@@ -66,7 +66,12 @@ class ToDo(Base):
         nullable=True
     )
 
-    remind_at: Mapped[Optional[datetime]] = mapped_column(
+    morning_remind_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+
+    deadline_remind_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True
     )

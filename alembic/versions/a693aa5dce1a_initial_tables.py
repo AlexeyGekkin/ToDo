@@ -24,6 +24,16 @@ def upgrade() -> None:
         sa.Column("email", sa.String(), nullable=False),
         sa.Column("password", sa.String(), nullable=False),
         sa.Column("telegram_id", sa.BigInteger(), nullable=True),
+        sa.Column(
+            "telegram_link_token",
+            sa.String(),
+            nullable=True,
+        ),
+        sa.Column(
+            "telegram_link_expires_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("email"),
         sa.UniqueConstraint("telegram_id"),
@@ -48,6 +58,13 @@ def upgrade() -> None:
         "users",
         ["telegram_id"],
         unique=False,
+    )
+
+    op.create_index(
+        "ix_users_telegram_link_token",
+        "users",
+        ["telegram_link_token"],
+        unique=True,
     )
 
     op.create_table(
@@ -115,6 +132,11 @@ def downgrade() -> None:
     )
 
     op.drop_table("todos")
+
+    op.drop_index(
+        "ix_users_telegram_link_token",
+        table_name="users",
+    )
 
     op.drop_index(
         "ix_users_telegram_id",

@@ -7,9 +7,12 @@ from app import schemas
 
 from app.dependencies import get_current_user, get_db
 from app.models import User
+
 from app.services.user_service import (
     register_user,
-    authenticate_user, delete_user_account
+    authenticate_user,
+    delete_user_account,
+    create_telegram_link,
 )
 
 
@@ -19,10 +22,17 @@ router = APIRouter(
 )
 
 @router.get("/telegram/link-url")
-async def get_telegram_link(current_user: User = Depends(get_current_user)):
-    # Генерируем временный токен или передаем ID пользователя прямо в параметр start
-    # Например, используем user.id или временный uuid
-    link = f"https://t.me/Gekkin_Alexey_notification_bot?start={current_user.id}"
+async def get_telegram_link(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    token = await create_telegram_link(current_user, db)
+
+    link = (
+        f"https://t.me/Gekkin_Alexey_notification_bot"
+        f"?start={token}"
+    )
+
     return {"link": link}
 
 @router.get("/me", response_model=schemas.UserResponse)

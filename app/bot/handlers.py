@@ -1,12 +1,12 @@
 from aiogram import Router, types
 from aiogram.filters import CommandStart, CommandObject
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import SessionLocal
 from app.models.user_model import User
 from app.bot.keyboards import get_main_keyboard
 
-
+from datetime import datetime, timezone
 router = Router()
 
 
@@ -14,10 +14,11 @@ router = Router()
 async def cmd_start(
     message: types.Message,
     command: CommandObject,
+    db: AsyncSession,
 ):
-    user_id_arg = command.args
+    token = command.args
 
-    if not user_id_arg:
+    if not token:
         await message.answer(
             f"Привет, {message.from_user.first_name}!\n\n"
             "Нажми кнопку ниже, чтобы открыть Mini App:",
@@ -25,37 +26,38 @@ async def cmd_start(
         )
         return
 
-    if not user_id_arg.isdigit():
+    result = await db.execute(
+        select(User).where(User.telegram_link_token == token)
+    )
+    user = result.scalar_one_or_none()
+
+    if not user:
         await message.answer(
-            "Некорректная ссылка для привязки аккаунта.",
+            "Ссылка недействительна или уже использована.",
             reply_markup=get_main_keyboard(),
         )
         return
 
-    user_id = int(user_id_arg)
-
-    async with SessionLocal() as session:
-        result = await session.execute(
-            select(User).where(User.id == user_id)
-        )
-
-        user = result.scalars().first()
-
-        if not user:
-            await message.answer(
-                "Ссылка устарела или пользователь не найден.",
-                reply_markup=get_main_keyboard(),
-            )
-            return
-
-        user.telegram_id = message.from_user.id
-
-        await session.commit()
-
+    if (
+        user.telegram_link_expires_at is None
+        or user.telegram_link_expires_at <= datetime.now(timezone.utc)
+    ):
         await message.answer(
-            f"**Отлично, {message.from_user.first_name}!**\n\n"
-            f"Твой Telegram успешно привязан к аккаунту **{user.email}**.\n"
-            f"Теперь ты можешь пользоваться приложением!",
-            parse_mode="Markdown",
+            "Срок действия ссылки истёк. Создай новую ссылку в приложении.",
             reply_markup=get_main_keyboard(),
         )
+        return
+
+    user.telegram_id = message.from_user.id
+    user.telegram_link_token = None
+    user.telegram_link_expires_at = None
+
+    await db.commit()
+
+    await message.answer(
+        f"**Отлично, {message.from_user.first_name}!**\n\n"
+        f"Твой Telegram успешно привязан к аккаунту **{user.email}**.\n"
+        f"Теперь ты можешь пользоваться приложением!",
+        parse_mode="Markdown",
+        reply_markup=get_main_keyboard(),
+    )

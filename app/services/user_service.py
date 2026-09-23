@@ -1,7 +1,8 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-
+from datetime import datetime, timedelta, timezone
+import secrets
 from app.schemas import UserCreate
 from app.models import User
 from app.services.auth_service import  (
@@ -10,6 +11,19 @@ from app.services.auth_service import  (
     create_access_token
 )
 
+async def create_telegram_link(
+    user: User,
+    db: AsyncSession,
+) -> str:
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+
+    user.telegram_link_token = token
+    user.telegram_link_expires_at = expires_at
+
+    await db.commit()
+
+    return token
 
 async def get_user_by_email(
     email: str,

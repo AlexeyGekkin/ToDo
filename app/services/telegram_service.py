@@ -1,21 +1,19 @@
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.models import User, ToDo
-from app.services.todo_service import calculate_remind_at
+from app.services.todo_service import calculate_remind_times
 
 
 async def get_user_by_telegram_id(
     telegram_id: int,
-    db: AsyncSession,
+    db: AsyncSession
 ) -> User:
-
     result = await db.execute(
-        select(User)
-        .where(User.telegram_id == telegram_id)
-        .options(selectinload(User.todos))
+        select(User).where(
+            User.telegram_id == telegram_id
+        )
     )
 
     user = result.scalar_one_or_none()
@@ -23,28 +21,35 @@ async def get_user_by_telegram_id(
     if not user:
         raise HTTPException(
             status_code=404,
-            detail="User not found",
+            detail="User not found"
         )
 
     return user
 
+
 async def get_profile(
     telegram_id: int,
-    db: AsyncSession,
+    db: AsyncSession
 ):
     user = await get_user_by_telegram_id(
         telegram_id,
         db
     )
 
-    total = len(user.todos)
-    active = len(
-        [
-            todo
-            for todo in user.todos
-            if not todo.completed
-        ]
+    stmt = (
+        select(
+            func.count(ToDo.id),
+            func.count(ToDo.id).filter(
+                ToDo.completed == False
+            )
+        )
+        .where(
+            ToDo.user_id == user.id
+        )
     )
+
+    res = await db.execute(stmt)
+    total, active = res.tuple()
 
     return {
         "email": user.email,
@@ -52,31 +57,42 @@ async def get_profile(
         "completed_count": total - active,
     }
 
+
 async def get_webapp_todos(
     telegram_id: int,
-    db: AsyncSession,
+    db: AsyncSession
 ):
     user = await get_user_by_telegram_id(
         telegram_id,
-        db,
+        db
     )
 
-    return user.todos
+    result = await db.execute(
+        select(ToDo).where(
+            ToDo.user_id == user.id
+        )
+    )
+
+    return result.scalars().all()
+
 
 async def create_webapp_todo(
     telegram_id: int,
     data,
-    db: AsyncSession,
+    db: AsyncSession
 ):
     user = await get_user_by_telegram_id(
         telegram_id,
-        db,
+        db
     )
 
-    remind_at = calculate_remind_at(
+    (
+        morning_remind_at,
+        deadline_remind_at
+    ) = calculate_remind_times(
         data.target_date,
         data.deadline_time,
-        data.reminder_type,
+        data.reminder_type
     )
 
     todo = ToDo(
@@ -84,7 +100,8 @@ async def create_webapp_todo(
         description=data.description,
         target_date=data.target_date,
         deadline_time=data.deadline_time,
-        remind_at=remind_at,
+        morning_remind_at=morning_remind_at,
+        deadline_remind_at=deadline_remind_at,
         reminder_type=data.reminder_type,
         user_id=user.id,
     )
@@ -96,21 +113,22 @@ async def create_webapp_todo(
 
     return {
         "status": "ok",
-        "id": todo.id,
+        "id": todo.id
     }
+
 
 async def update_webapp_todo(
     telegram_id: int,
     todo_id: int,
     completed: bool,
-    db: AsyncSession,
+    db: AsyncSession
 ):
     result = await db.execute(
         select(ToDo)
         .join(User)
         .where(
             ToDo.id == todo_id,
-            User.telegram_id == telegram_id,
+            User.telegram_id == telegram_id
         )
     )
 
@@ -119,7 +137,7 @@ async def update_webapp_todo(
     if not todo:
         raise HTTPException(
             status_code=404,
-            detail="Task not found",
+            detail="Task not found"
         )
 
     todo.completed = completed
@@ -127,16 +145,17 @@ async def update_webapp_todo(
     await db.commit()
 
     return {
-        "status": "ok",
+        "status": "ok"
     }
+
 
 async def delete_webapp_account(
     telegram_id: int,
-    db: AsyncSession,
+    db: AsyncSession
 ):
     user = await get_user_by_telegram_id(
         telegram_id,
-        db,
+        db
     )
 
     await db.delete(user)
@@ -145,5 +164,5 @@ async def delete_webapp_account(
 
     return {
         "status": "ok",
-        "message": "Account deleted",
+        "message": "Account deleted"
     }

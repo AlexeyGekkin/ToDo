@@ -2,6 +2,8 @@ services:
   db:
     image: postgres:17
     restart: unless-stopped
+    ports:
+      - "5432:5432"  # База доступна на стандартном порту
     environment:
       POSTGRES_DB: todo
       POSTGRES_USER: todo_user
