@@ -44,7 +44,12 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
-
+      - name: Check SSH key
+        env:
+          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" | head -n 1
+          echo "$SSH_KEY" | tail -n 1
   deploy:
     needs: tests
     runs-on: ubuntu-latest
