@@ -48,8 +48,10 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
         run: |
-          echo "$SSH_KEY" | head -n 1
-          echo "$SSH_KEY" | tail -n 1
+          echo "$SSH_KEY" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+          ssh-keygen -y -f /tmp/deploy_key > /dev/null
+          echo "SSH key format is valid"
   deploy:
     needs: tests
     runs-on: ubuntu-latest
