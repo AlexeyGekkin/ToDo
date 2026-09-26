@@ -44,14 +44,7 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
-      - name: Check SSH key
-        env:
-          SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-        run: |
-          echo "$SSH_KEY" > /tmp/deploy_key
-          chmod 600 /tmp/deploy_key
-          ssh-keygen -y -f /tmp/deploy_key > /dev/null
-          echo "SSH key format is valid"
+
   deploy:
     needs: tests
     runs-on: ubuntu-latest
@@ -62,7 +55,7 @@ jobs:
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY_B64 }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /home/deploy/todo
 
