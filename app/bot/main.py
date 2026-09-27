@@ -16,3 +16,4 @@ dp.update.middleware(DbSessionMiddleware())
 
 dp.include_router(bot_router)
 dp.include_router(callback_router)
+
