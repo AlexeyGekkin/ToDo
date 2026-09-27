@@ -16,7 +16,6 @@ jobs:
           POSTGRES_USER: todo_user
           POSTGRES_PASSWORD: test_password
           POSTGRES_DB: todo
-          SECRET_KEY: SECRET_KEY
         ports:
           - 5432:5432
         options: >-
@@ -27,6 +26,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql+asyncpg://todo_user:test_password@127.0.0.1:5432/todo
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
     steps:
       - name: Checkout
@@ -68,4 +68,3 @@ jobs:
             fi
 
             docker compose up -d --build
-
