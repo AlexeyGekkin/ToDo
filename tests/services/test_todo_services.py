@@ -1,5 +1,5 @@
 import pytest
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timezone
 
 from fastapi import HTTPException
 
@@ -23,6 +23,7 @@ def test_calculate_remind_times_deadline():
         date(2026, 8, 10),
         time(18, 30),
         ReminderType.DEADLINE,
+        "Europe/Samara",
     )
 
     assert morning_remind_at is None
@@ -30,8 +31,9 @@ def test_calculate_remind_times_deadline():
         2026,
         8,
         10,
-        18,
-        30
+        14,
+        30,
+        tzinfo=timezone.utc,
     )
 
 
@@ -41,14 +43,16 @@ def test_calculate_remind_times_morning():
         date(2026, 8, 10),
         None,
         ReminderType.MORNING,
+        "Europe/Samara",
     )
 
     assert morning_remind_at == datetime(
         2026,
         8,
         10,
-        9,
-        0
+        4,
+        0,
+        tzinfo=timezone.utc,
     )
     assert deadline_remind_at is None
 
@@ -59,21 +63,24 @@ def test_calculate_remind_times_both():
         date(2026, 8, 10),
         time(18, 30),
         ReminderType.BOTH,
+        "Europe/Samara",
     )
 
     assert morning_remind_at == datetime(
         2026,
         8,
         10,
-        9,
-        0
+        4,
+        0,
+        tzinfo=timezone.utc,
     )
     assert deadline_remind_at == datetime(
         2026,
         8,
         10,
-        18,
-        30
+        14,
+        30,
+        tzinfo=timezone.utc,
     )
 
 
@@ -83,6 +90,7 @@ def test_calculate_remind_times_none():
         None,
         None,
         ReminderType.NONE,
+        "Europe/Samara",
     )
 
     assert morning_remind_at is None
@@ -95,6 +103,7 @@ def test_calculate_remind_times_without_date():
         None,
         time(18, 30),
         ReminderType.BOTH,
+        "Europe/Samara",
     )
 
     assert morning_remind_at is None
