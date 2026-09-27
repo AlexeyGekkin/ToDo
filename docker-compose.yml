@@ -3,13 +3,16 @@ services:
     image: postgres:17
     restart: unless-stopped
     ports:
-      - "5432:5432"  # База доступна на стандартном порту
+      - "5432:5432"
     environment:
       POSTGRES_DB: todo
       POSTGRES_USER: todo_user
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - todo_default
+      - bot_net
 
   app:
     build: .
@@ -20,6 +23,31 @@ services:
       - db
     ports:
       - "8000:8000"
+    networks:
+      - todo_default
+
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: ["python", "-m", "app.bot.run"]
+    networks:
+      bot_net:
+        gw_priority: 100
 
 volumes:
   postgres_data:
+
+networks:
+  todo_default:
+
+  bot_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-bot
+    ipam:
+      config:
+        - subnet: 172.19.0.0/24
