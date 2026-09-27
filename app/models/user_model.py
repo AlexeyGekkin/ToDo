@@ -45,3 +45,9 @@ class User(Base):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+
+    timezone: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        server_default="Europe/Samara",
+    )

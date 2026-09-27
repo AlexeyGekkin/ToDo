@@ -1,4 +1,5 @@
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timezone
+from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
 from sqlalchemy import asc, desc, select
@@ -13,6 +14,7 @@ def calculate_remind_times(
     target_date: date | None,
     deadline_time: time | None,
     reminder_type: ReminderType,
+    user_timezone: str,
 ) -> tuple[datetime | None, datetime | None]:
 
     morning_remind_at = None
@@ -21,17 +23,29 @@ def calculate_remind_times(
     if not target_date or reminder_type == ReminderType.NONE:
         return morning_remind_at, deadline_remind_at
 
+    timezone_info = ZoneInfo(user_timezone)
+
     if reminder_type in (ReminderType.MORNING, ReminderType.BOTH):
-        morning_remind_at = datetime.combine(
+        morning_local = datetime.combine(
             target_date,
-            time(9, 0)
+            time(8, 0),
+            tzinfo=timezone_info,
+        )
+
+        morning_remind_at = morning_local.astimezone(
+            timezone.utc
         )
 
     if reminder_type in (ReminderType.DEADLINE, ReminderType.BOTH):
         if deadline_time:
-            deadline_remind_at = datetime.combine(
+            deadline_local = datetime.combine(
                 target_date,
-                deadline_time
+                deadline_time,
+                tzinfo=timezone_info,
+            )
+
+            deadline_remind_at = deadline_local.astimezone(
+                timezone.utc
             )
 
     return morning_remind_at, deadline_remind_at
@@ -68,7 +82,8 @@ async def create_todo(
     morning_remind_at, deadline_remind_at = calculate_remind_times(
         todo_data.target_date,
         todo_data.deadline_time,
-        todo_data.reminder_type
+        todo_data.reminder_type,
+        user.timezone,
     )
 
     todo = ToDo(
@@ -189,7 +204,8 @@ async def update_todo(
         ) = calculate_remind_times(
             todo.target_date,
             todo.deadline_time,
-            todo.reminder_type
+            todo.reminder_type,
+            user.timezone,
         )
 
     await db.commit()
