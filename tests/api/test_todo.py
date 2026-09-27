@@ -243,7 +243,7 @@ async def test_create_todo_morning_reminder(client, auth_token):
     data = response.json()
 
     assert data["reminder_type"] == "morning"
-    assert data["morning_remind_at"] == "2026-10-01T09:00:00"
+    assert data["morning_remind_at"] == "2026-10-01T04:00:00"
     assert data["deadline_remind_at"] is None
 
 
@@ -266,7 +266,7 @@ async def test_create_todo_deadline_reminder(client, auth_token):
 
     assert data["reminder_type"] == "deadline"
     assert data["morning_remind_at"] is None
-    assert data["deadline_remind_at"] == "2026-10-01T18:30:00"
+    assert data["deadline_remind_at"] == "2026-10-01T14:30:00"
 
 
 @pytest.mark.asyncio
@@ -287,8 +287,8 @@ async def test_create_todo_both_reminders(client, auth_token):
     data = response.json()
 
     assert data["reminder_type"] == "both"
-    assert data["morning_remind_at"] == "2026-10-01T09:00:00"
-    assert data["deadline_remind_at"] == "2026-10-01T18:30:00"
+    assert data["morning_remind_at"] == "2026-10-01T04:00:00"
+    assert data["deadline_remind_at"] == "2026-10-01T14:30:00"
 
 
 @pytest.mark.asyncio
@@ -342,8 +342,8 @@ async def test_update_todo_reminder_type(client, auth_token):
     data = response.json()
 
     assert data["reminder_type"] == "both"
-    assert data["morning_remind_at"] == "2026-10-01T09:00:00"
-    assert data["deadline_remind_at"] == "2026-10-01T18:30:00"
+    assert data["morning_remind_at"] == "2026-10-01T04:00:00"
+    assert data["deadline_remind_at"] == "2026-10-01T14:30:00"
 
 
 @pytest.mark.asyncio
@@ -378,7 +378,7 @@ async def test_update_todo_deadline_time(client, auth_token):
     data = response.json()
 
     assert data["deadline_time"] == "20:00:00"
-    assert data["deadline_remind_at"] == "2026-10-01T20:00:00"
+    assert data["deadline_remind_at"] == "2026-10-01T16:00:00"
 
 
 @pytest.mark.asyncio
