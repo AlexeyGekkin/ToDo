@@ -26,7 +26,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql+asyncpg://todo_user:test_password@127.0.0.1:5432/todo
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      SECRET_KEY: secret_key
 
     steps:
       - name: Checkout
