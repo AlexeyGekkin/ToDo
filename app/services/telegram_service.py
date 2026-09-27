@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User, ToDo
@@ -151,18 +151,36 @@ async def update_webapp_todo(
 
 async def delete_webapp_account(
     telegram_id: int,
-    db: AsyncSession
+    db: AsyncSession,
 ):
-    user = await get_user_by_telegram_id(
-        telegram_id,
-        db
+    result = await db.execute(
+        select(User.id)
+        .where(User.telegram_id == telegram_id)
     )
 
-    await db.delete(user)
+    user_id = result.scalar_one_or_none()
+
+    if user_id is None:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
+
+    await db.execute(
+        delete(ToDo).where(
+            ToDo.user_id == user_id
+        )
+    )
+
+    await db.execute(
+        delete(User).where(
+            User.id == user_id
+        )
+    )
 
     await db.commit()
 
     return {
         "status": "ok",
-        "message": "Account deleted"
+        "message": "Account deleted",
     }

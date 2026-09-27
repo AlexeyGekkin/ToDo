@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -16,462 +17,837 @@
             --danger: #ff3b30;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-            padding-bottom: 70px;
-        }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 0;
+        padding-bottom: 70px;
+    }
 
-        .header {
-            padding: 16px;
-            background: var(--card-bg);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
+    .header {
+        padding: 16px;
+        background: var(--card-bg);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+    }
 
-        .tab-content { display: none; padding: 16px; }
-        .tab-content.active { display: block; }
+    .tab-content {
+        display: none;
+        padding: 16px;
+    }
 
-        .filters {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        .filter-btn {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            background: var(--card-bg);
-            color: var(--text);
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .filter-btn.active {
-            background: var(--button);
-            color: var(--button-text);
-            font-weight: bold;
-        }
+    .tab-content.active {
+        display: block;
+    }
 
-        .task-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .task-info { flex-grow: 1; margin-left: 12px; }
-        .task-title { font-size: 16px; font-weight: 500; }
-        .task-title.completed { text-decoration: line-through; color: var(--hint); }
-        .task-meta { font-size: 12px; color: var(--hint); margin-top: 4px; }
+    .filters {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
 
-        .checkbox {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            border: 2px solid var(--hint);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        .checkbox.checked {
-            background: var(--button);
-            border-color: var(--button);
-            color: var(--button-text);
-        }
+    .filter-btn {
+        flex: 1;
+        padding: 8px;
+        border: none;
+        background: var(--card-bg);
+        color: var(--text);
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+    }
 
-        .form-group { margin-bottom: 16px; }
-        label { display: block; font-size: 13px; color: var(--hint); margin-bottom: 6px; }
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 10px;
-            background: var(--card-bg);
-            color: var(--text);
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        .hidden { display: none; }
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--button);
-            color: var(--button-text);
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .danger-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--danger);
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-        }
+    .filter-btn.active {
+        background: var(--button);
+        color: var(--button-text);
+        font-weight: bold;
+    }
 
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: var(--card-bg);
-            display: flex;
-            border-top: 1px solid rgba(0,0,0,0.05);
-        }
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: var(--hint);
-            cursor: pointer;
-        }
-        .nav-item.active { color: var(--button); font-weight: bold; }
-        .nav-item span { font-size: 20px; margin-bottom: 2px; }
+    .task-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-        .stat-box {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-        }
-    </style>
+    .task-info {
+        flex-grow: 1;
+        margin-left: 12px;
+    }
+
+    .task-title {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .task-title.completed {
+        text-decoration: line-through;
+        color: var(--hint);
+    }
+
+    .task-meta {
+        font-size: 12px;
+        color: var(--hint);
+        margin-top: 4px;
+    }
+
+    .checkbox {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid var(--hint);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .checkbox.checked {
+        background: var(--button);
+        border-color: var(--button);
+        color: var(--button-text);
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    label {
+        display: block;
+        font-size: 13px;
+        color: var(--hint);
+        margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 10px;
+        background: var(--card-bg);
+        color: var(--text);
+        box-sizing: border-box;
+        font-size: 16px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--button);
+        color: var(--button-text);
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .danger-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--danger);
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+
+    .nav-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: var(--card-bg);
+        display: flex;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: var(--hint);
+        cursor: pointer;
+    }
+
+    .nav-item.active {
+        color: var(--button);
+        font-weight: bold;
+    }
+
+    .nav-item span {
+        font-size: 20px;
+        margin-bottom: 2px;
+    }
+
+    .stat-box {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+</style>
+```
+
 </head>
 <body>
 
-    <div class="header" id="headerTitle">Мои задачи</div>
+```
+<div class="header" id="headerTitle">Мои задачи</div>
 
-    <!-- Вкладка 1: Список задач -->
-    <div id="tab-tasks" class="tab-content active">
-        <div class="filters">
-            <button class="filter-btn active" onclick="setFilter('today', event)">Сегодня</button>
-            <button class="filter-btn" onclick="setFilter('week', event)">Неделя</button>
-            <button class="filter-btn" onclick="setFilter('all', event)">Все</button>
-        </div>
-        <div id="tasksList">Загрузка...</div>
+<!-- Вкладка 1: Список задач -->
+<div id="tab-tasks" class="tab-content active">
+    <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('today', event)">Сегодня</button>
+        <button class="filter-btn" onclick="setFilter('week', event)">Неделя</button>
+        <button class="filter-btn" onclick="setFilter('all', event)">Все</button>
     </div>
 
-    <!-- Вкладка 2: Создать задачу -->
-    <div id="tab-create" class="tab-content">
-        <form id="todoForm">
-            <div class="form-group">
-                <label for="title">Название *</label>
-                <input type="text" id="title" required placeholder="Например: Сдать отчёт">
-            </div>
-            <div class="form-group">
-                <label for="description">Описание</label>
-                <textarea id="description" rows="2" placeholder="Заметки..."></textarea>
-            </div>
-            <div class="form-group">
-                <label for="target_date">День выполнения задачи</label>
-                <input type="date" id="target_date">
-            </div>
-            <div class="form-group">
-                <label for="reminder_type">Тип напоминания</label>
-                <select id="reminder_type">
-                    <option value="none">Без напоминания</option>
-                    <option value="morning">Утреннее напоминание (09:00)</option>
-                    <option value="deadline">⏰ Напомнить в дедлайн</option>
-                    <option value="both">🔔 И утром, и в дедлайн</option>
-                </select>
-            </div>
+    <div id="tasksList">Загрузка...</div>
+</div>
 
-            <!-- Выбор отдельного дня и времени для дедлайна -->
-            <div id="deadlineBlock" class="hidden">
-                <div class="form-group">
-                    <label for="deadline_date">Дата дедлайна (когда напомнить)</label>
-                    <input type="date" id="deadline_date">
+<!-- Вкладка 2: Создать задачу -->
+<div id="tab-create" class="tab-content">
+    <form id="todoForm">
+
+        <div class="form-group">
+            <label for="title">Название *</label>
+            <input
+                type="text"
+                id="title"
+                required
+                placeholder="Например: Сдать отчёт"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="description">Описание</label>
+            <textarea
+                id="description"
+                rows="2"
+                placeholder="Заметки..."
+            ></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="target_date">День выполнения задачи</label>
+            <input type="date" id="target_date">
+        </div>
+
+        <div class="form-group">
+            <label for="reminder_type">Тип напоминания</label>
+            <select id="reminder_type">
+                <option value="none">Без напоминания</option>
+                <option value="morning">Утреннее напоминание (09:00)</option>
+                <option value="deadline">⏰ Напомнить в дедлайн</option>
+                <option value="both">🔔 И утром, и в дедлайн</option>
+            </select>
+        </div>
+
+        <!-- Время дедлайна. Дедлайн всегда в день выполнения задачи. -->
+        <div id="deadlineBlock" class="hidden">
+            <div class="form-group">
+                <label for="deadline_time">Время дедлайна</label>
+                <input type="time" id="deadline_time">
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+            Сохранить
+        </button>
+    </form>
+</div>
+
+<!-- Вкладка 3: Профиль -->
+<div id="tab-profile" class="tab-content">
+
+    <div class="stat-box">
+        <div style="font-size: 14px; color: var(--hint);">
+            Пользователь
+        </div>
+
+        <div
+            id="profEmail"
+            style="font-size: 18px; font-weight: bold; margin-top: 4px;"
+        >
+            -
+        </div>
+    </div>
+
+    <div class="stat-box">
+        <div style="font-size: 14px; color: var(--hint);">
+            Активных задач
+        </div>
+
+        <div
+            id="profActive"
+            style="font-size: 24px; font-weight: bold; color: var(--button); margin-top: 4px;"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="stat-box">
+        <div style="font-size: 14px; color: var(--hint);">
+            Выполнено
+        </div>
+
+        <div
+            id="profCompleted"
+            style="font-size: 24px; font-weight: bold; margin-top: 4px;"
+        >
+            0
+        </div>
+    </div>
+
+    <!-- КНОПКА УДАЛЕНИЯ АККАУНТА -->
+    <button
+        type="button"
+        class="danger-btn"
+        onclick="deleteAccount()"
+    >
+        💀 Удалить аккаунт
+    </button>
+</div>
+
+<div class="nav-bar">
+
+    <div
+        class="nav-item active"
+        onclick="switchTab('tasks')"
+    >
+        <span>📋</span>
+        Задачи
+    </div>
+
+    <div
+        class="nav-item"
+        onclick="switchTab('create')"
+    >
+        <span>➕</span>
+        Создать
+    </div>
+
+    <div
+        class="nav-item"
+        onclick="switchTab('profile')"
+    >
+        <span>👤</span>
+        Профиль
+    </div>
+
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+
+    tg.expand();
+
+    let allTodos = [];
+    let currentFilter = 'today';
+
+    const reminderSelect =
+        document.getElementById('reminder_type');
+
+    const deadlineBlock =
+        document.getElementById('deadlineBlock');
+
+    const targetDateInput =
+        document.getElementById('target_date');
+
+    const deadlineTimeInput =
+        document.getElementById('deadline_time');
+
+
+    // Проверка отсутствия пользователя в БД (401 / 404)
+    function handleAuthError(response) {
+        if (
+            response.status === 401 ||
+            response.status === 404
+        ) {
+            document.body.innerHTML = `
+                <div style="
+                    display:flex;
+                    flex-direction:column;
+                    align-items:center;
+                    justify-content:center;
+                    height:100vh;
+                    padding:20px;
+                    text-align:center;
+                ">
+                    <h2>Доступ запрещён</h2>
+
+                    <p style="color:var(--hint);">
+                        Ваш аккаунт удалён или не найден в базе.
+                    </p>
                 </div>
-                <div class="form-group">
-                    <label for="deadline_time">Время дедлайна</label>
-                    <input type="time" id="deadline_time">
-                </div>
-            </div>
+            `;
 
-            <button type="submit" class="submit-btn">Сохранить</button>
-        </form>
-    </div>
-
-    <!-- Вкладка 3: Профиль -->
-    <div id="tab-profile" class="tab-content">
-        <div class="stat-box">
-            <div style="font-size: 14px; color: var(--hint);">Пользователь</div>
-            <div id="profEmail" style="font-size: 18px; font-weight: bold; margin-top: 4px;">-</div>
-        </div>
-        <div class="stat-box">
-            <div style="font-size: 14px; color: var(--hint);">Активных задач</div>
-            <div id="profActive" style="font-size: 24px; font-weight: bold; color: var(--button); margin-top: 4px;">0</div>
-        </div>
-        <div class="stat-box">
-            <div style="font-size: 14px; color: var(--hint);">Выполнено</div>
-            <div id="profCompleted" style="font-size: 24px; font-weight: bold; margin-top: 4px;">0</div>
-        </div>
-
-        <!-- КНОПКА УДАЛЕНИЯ АККАУНТА -->
-        <button type="button" class="danger-btn" onclick="deleteAccount()">💀 Удалить аккаунт</button>
-    </div>
-
-    <div class="nav-bar">
-        <div class="nav-item active" onclick="switchTab('tasks')">
-            <span>📋</span>Задачи
-        </div>
-        <div class="nav-item" onclick="switchTab('create')">
-            <span>➕</span>Создать
-        </div>
-        <div class="nav-item" onclick="switchTab('profile')">
-            <span>👤</span>Профиль
-        </div>
-    </div>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let allTodos = [];
-        let currentFilter = 'today';
-
-        const reminderSelect = document.getElementById('reminder_type');
-        const deadlineBlock = document.getElementById('deadlineBlock');
-        const targetDateInput = document.getElementById('target_date');
-        const deadlineDateInput = document.getElementById('deadline_date');
-        const deadlineTimeInput = document.getElementById('deadline_time');
-
-        // Проверка отсутствия пользователя в БД (401 / 404)
-        function handleAuthError(response) {
-            if (response.status === 401 || response.status === 404) {
-                document.body.innerHTML = `
-                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; padding:20px; text-align:center;">
-                        <h2>Доступ запрещён</h2>
-                        <p style="color:var(--hint);">Ваш аккаунт удалён или не найден в базе.</p>
-                    </div>
-                `;
-                setTimeout(() => { tg.close(); }, 2000);
-                return true;
-            }
-            return false;
-        }
-
-        // Блокируем прошедшие даты (min = сегодня)
-        function updateMinDates() {
-            const today = new Date().toISOString().split('T')[0];
-            targetDateInput.min = today;
-            deadlineDateInput.min = today;
-        }
-        updateMinDates();
-
-        // Блокируем прошедшее время, если выбрана сегодняшняя дата
-        deadlineDateInput.addEventListener('change', () => {
-            const today = new Date().toISOString().split('T')[0];
-            if (deadlineDateInput.value === today) {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                deadlineTimeInput.min = `${hours}:${minutes}`;
-            } else {
-                deadlineTimeInput.removeAttribute('min');
-            }
-        });
-
-        reminderSelect.addEventListener('change', (e) => {
-            const val = e.target.value;
-            if (val === 'deadline' || val === 'both') {
-                deadlineBlock.classList.remove('hidden');
-            } else {
-                deadlineBlock.classList.add('hidden');
-            }
-        });
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-            if (tabName === 'tasks') {
-                document.getElementById('tab-tasks').classList.add('active');
-                document.querySelectorAll('.nav-item')[0].classList.add('active');
-                document.getElementById('headerTitle').innerText = 'Мои задачи';
-                loadTasks();
-            } else if (tabName === 'create') {
-                document.getElementById('tab-create').classList.add('active');
-                document.querySelectorAll('.nav-item')[1].classList.add('active');
-                document.getElementById('headerTitle').innerText = 'Новая задача';
-                updateMinDates();
-            } else if (tabName === 'profile') {
-                document.getElementById('tab-profile').classList.add('active');
-                document.querySelectorAll('.nav-item')[2].classList.add('active');
-                document.getElementById('headerTitle').innerText = 'Профиль';
-                loadProfile();
-            }
-        }
-
-        async function loadTasks() {
-            try {
-                const res = await fetch(`/api/telegram/todos?init_data=${encodeURIComponent(tg.initData)}`);
-                if (handleAuthError(res)) return;
-                if (!res.ok) throw new Error();
-                allTodos = await res.json();
-                renderTasks();
-            } catch (e) {
-                document.getElementById('tasksList').innerHTML = '<div style="text-align:center; color:var(--hint);">Ошибка загрузки</div>';
-            }
-        }
-
-        function setFilter(filter, evt) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            if (evt && evt.target) evt.target.classList.add('active');
-            renderTasks();
-        }
-
-        function renderTasks() {
-            const list = document.getElementById('tasksList');
-            const now = new Date();
-            const todayStr = now.toISOString().split('T')[0];
-
-            let filtered = allTodos.filter(t => {
-                if (currentFilter === 'all') return true;
-                const taskDateStr = t.target_date || (t.remind_at ? t.remind_at.split('T')[0] : null);
-                if (!taskDateStr) return currentFilter === 'all';
-
-                if (currentFilter === 'today') return taskDateStr === todayStr;
-                if (currentFilter === 'week') {
-                    const taskDate = new Date(taskDateStr);
-                    const diffDays = (taskDate - now) / (1000 * 3600 * 24);
-                    return diffDays >= -1 && diffDays <= 7;
-                }
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding: 20px; color:var(--hint);">Задач нет 🥳</div>';
-                return;
-            }
-
-            list.innerHTML = filtered.map(t => {
-                let metaText = '';
-                if (t.target_date) metaText += `📅 Выполнить: ${t.target_date} `;
-                if (t.remind_at) {
-                    const d = new Date(t.remind_at);
-                    metaText += `⏰ Напомнить: ${d.toLocaleDateString([], {day:'2-digit', month:'2-digit'})} в ${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
-                }
-
-                return `
-                    <div class="task-card">
-                        <div class="checkbox ${t.completed ? 'checked' : ''}" onclick="toggleTask(${t.id}, ${!t.completed})">
-                            ${t.completed ? '✓' : ''}
-                        </div>
-                        <div class="task-info">
-                            <div class="task-title ${t.completed ? 'completed' : ''}">${t.title}</div>
-                            ${metaText ? `<div class="task-meta">${metaText}</div>` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function toggleTask(id, completed) {
-            const res = await fetch(`/api/telegram/todos/${id}?init_data=${encodeURIComponent(tg.initData)}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ completed: completed })
-            });
-            if (handleAuthError(res)) return;
-            loadTasks();
-        }
-
-        async function loadProfile() {
-            const res = await fetch(`/api/telegram/profile?init_data=${encodeURIComponent(tg.initData)}`);
-            if (handleAuthError(res)) return;
-            if (res.ok) {
-                const p = await res.json();
-                document.getElementById('profEmail').innerText = p.email;
-                document.getElementById('profActive').innerText = p.active_count;
-                document.getElementById('profCompleted').innerText = p.completed_count;
-            }
-        }
-
-        // Функция удаления аккаунта
-        async function deleteAccount() {
-            if (!confirm("Вы действительно хотите полностью удалить аккаунт и все задачи? Это действие нельзя отменить!")) {
-                return;
-            }
-
-            const res = await fetch(`/api/telegram/account?init_data=${encodeURIComponent(tg.initData)}`, {
-                method: 'DELETE'
-            });
-
-            if (res.ok) {
-                alert("Аккаунт успешно удалён.");
+            setTimeout(() => {
                 tg.close();
-            } else {
-                alert("Ошибка при удалении аккаунта.");
-            }
+            }, 2000);
+
+            return true;
         }
 
-        document.getElementById('todoForm').addEventListener('submit', async (e) => {
+        return false;
+    }
+
+
+    // Блокируем прошедшие даты
+    function updateMinDates() {
+        const today =
+            new Date().toISOString().split('T')[0];
+
+        targetDateInput.min = today;
+    }
+
+    updateMinDates();
+
+
+    // Если дедлайн сегодня — запрещаем выбрать прошедшее время.
+    targetDateInput.addEventListener('change', () => {
+        const today =
+            new Date().toISOString().split('T')[0];
+
+        if (targetDateInput.value === today) {
+            const now = new Date();
+
+            const hours =
+                String(now.getHours()).padStart(2, '0');
+
+            const minutes =
+                String(now.getMinutes()).padStart(2, '0');
+
+            deadlineTimeInput.min =
+                `${hours}:${minutes}`;
+        } else {
+            deadlineTimeInput.removeAttribute('min');
+        }
+    });
+
+
+    reminderSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+
+        if (
+            val === 'deadline' ||
+            val === 'both'
+        ) {
+            deadlineBlock.classList.remove('hidden');
+        } else {
+            deadlineBlock.classList.add('hidden');
+        }
+    });
+
+
+    function switchTab(tabName) {
+        document
+            .querySelectorAll('.tab-content')
+            .forEach(el => {
+                el.classList.remove('active');
+            });
+
+        document
+            .querySelectorAll('.nav-item')
+            .forEach(el => {
+                el.classList.remove('active');
+            });
+
+
+        if (tabName === 'tasks') {
+            document
+                .getElementById('tab-tasks')
+                .classList.add('active');
+
+            document
+                .querySelectorAll('.nav-item')[0]
+                .classList.add('active');
+
+            document
+                .getElementById('headerTitle')
+                .innerText = 'Мои задачи';
+
+            loadTasks();
+
+        } else if (tabName === 'create') {
+            document
+                .getElementById('tab-create')
+                .classList.add('active');
+
+            document
+                .querySelectorAll('.nav-item')[1]
+                .classList.add('active');
+
+            document
+                .getElementById('headerTitle')
+                .innerText = 'Новая задача';
+
+            updateMinDates();
+
+        } else if (tabName === 'profile') {
+            document
+                .getElementById('tab-profile')
+                .classList.add('active');
+
+            document
+                .querySelectorAll('.nav-item')[2]
+                .classList.add('active');
+
+            document
+                .getElementById('headerTitle')
+                .innerText = 'Профиль';
+
+            loadProfile();
+        }
+    }
+
+
+    async function loadTasks() {
+        try {
+            const res = await fetch(
+                `/api/telegram/todos?init_data=${encodeURIComponent(tg.initData)}`
+            );
+
+            if (handleAuthError(res)) {
+                return;
+            }
+
+            if (!res.ok) {
+                throw new Error();
+            }
+
+            allTodos = await res.json();
+
+            renderTasks();
+
+        } catch (e) {
+            document.getElementById('tasksList').innerHTML =
+                '<div style="text-align:center; color:var(--hint);">Ошибка загрузки</div>';
+        }
+    }
+
+
+    function setFilter(filter, evt) {
+        currentFilter = filter;
+
+        document
+            .querySelectorAll('.filter-btn')
+            .forEach(b => {
+                b.classList.remove('active');
+            });
+
+        if (evt && evt.target) {
+            evt.target.classList.add('active');
+        }
+
+        renderTasks();
+    }
+
+
+    function renderTasks() {
+        const list =
+            document.getElementById('tasksList');
+
+        const now = new Date();
+
+        const todayStr =
+            now.toISOString().split('T')[0];
+
+
+        let filtered = allTodos.filter(t => {
+            const taskDateStr = t.target_date;
+
+            if (!taskDateStr) {
+                return currentFilter === 'all';
+            }
+
+            if (currentFilter === 'today') {
+                return taskDateStr === todayStr;
+            }
+
+            if (currentFilter === 'week') {
+                const taskDate =
+                    new Date(taskDateStr);
+
+                const diffDays =
+                    (taskDate - now) /
+                    (1000 * 3600 * 24);
+
+                return (
+                    diffDays >= -1 &&
+                    diffDays <= 7
+                );
+            }
+
+            return true;
+        });
+
+
+        if (filtered.length === 0) {
+            list.innerHTML =
+                '<div style="text-align:center; padding: 20px; color:var(--hint);">Задач нет 🥳';
+
+            return;
+        }
+
+
+        list.innerHTML = filtered.map(t => {
+            let metaText = '';
+
+            if (t.target_date) {
+                metaText +=
+                    `📅 Выполнить: ${t.target_date} `;
+            }
+
+            if (t.deadline_remind_at) {
+                const deadline =
+                    new Date(t.deadline_remind_at);
+
+                metaText +=
+                    `⏰ Дедлайн: ${deadline.toLocaleDateString([], {
+                        day: '2-digit',
+                        month: '2-digit'
+                    })} в ${deadline.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}`;
+            }
+
+            if (t.morning_remind_at) {
+                const morning =
+                    new Date(t.morning_remind_at);
+
+                metaText +=
+                    ` 🔔 Утро: ${morning.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}`;
+            }
+
+
+            return `
+                <div class="task-card">
+
+                    <div
+                        class="checkbox ${t.completed ? 'checked' : ''}"
+                        onclick="toggleTask(${t.id}, ${!t.completed})"
+                    >
+                        ${t.completed ? '✓' : ''}
+                    </div>
+
+                    <div class="task-info">
+
+                        <div class="task-title ${t.completed ? 'completed' : ''}">
+                            ${t.title}
+                        </div>
+
+                        ${
+                            metaText
+                                ? `<div class="task-meta">${metaText}</div>`
+                                : ''
+                        }
+
+                    </div>
+
+                </div>
+            `;
+        }).join('');
+    }
+
+
+    async function toggleTask(id, completed) {
+        const res = await fetch(
+            `/api/telegram/todos/${id}?init_data=${encodeURIComponent(tg.initData)}`,
+            {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    completed: completed
+                })
+            }
+        );
+
+        if (handleAuthError(res)) {
+            return;
+        }
+
+        loadTasks();
+    }
+
+
+    async function loadProfile() {
+        const res = await fetch(
+            `/api/telegram/profile?init_data=${encodeURIComponent(tg.initData)}`
+        );
+
+        if (handleAuthError(res)) {
+            return;
+        }
+
+        if (res.ok) {
+            const p = await res.json();
+
+            document.getElementById('profEmail').innerText =
+                p.email;
+
+            document.getElementById('profActive').innerText =
+                p.active_count;
+
+            document.getElementById('profCompleted').innerText =
+                p.completed_count;
+        }
+    }
+
+
+    // Функция удаления аккаунта
+    async function deleteAccount() {
+        if (
+            !confirm(
+                "Вы действительно хотите полностью удалить аккаунт и все задачи? Это действие нельзя отменить!"
+            )
+        ) {
+            return;
+        }
+
+        const res = await fetch(
+            `/api/telegram/account?init_data=${encodeURIComponent(tg.initData)}`,
+            {
+                method: 'DELETE'
+            }
+        );
+
+        if (res.ok) {
+            alert("Аккаунт успешно удалён.");
+            tg.close();
+        } else {
+            alert("Ошибка при удалении аккаунта.");
+        }
+    }
+
+
+    document
+        .getElementById('todoForm')
+        .addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const target_date = targetDateInput.value || null;
-            const reminder_type = reminderSelect.value;
-            const deadline_date = deadlineDateInput.value || target_date;
-            const deadline_time = deadlineTimeInput.value || null;
+            const target_date =
+                targetDateInput.value || null;
 
-            // Валидация прошедшего времени
-            if ((reminder_type === 'deadline' || reminder_type === 'both') && deadline_date && deadline_time) {
-                const selectedDeadline = new Date(`${deadline_date}T${deadline_time}`);
-                if (selectedDeadline < new Date()) {
-                    alert('Ошибка: время дедлайна не может быть в прошлом!');
+            const reminder_type =
+                reminderSelect.value;
+
+            const deadline_time =
+                deadlineTimeInput.value || null;
+
+
+            // Валидация прошедшего времени.
+            // Дедлайн всегда относится к target_date.
+            if (
+                (
+                    reminder_type === 'deadline' ||
+                    reminder_type === 'both'
+                ) &&
+                target_date &&
+                deadline_time
+            ) {
+                const selectedDeadline =
+                    new Date(
+                        `${target_date}T${deadline_time}`
+                    );
+
+                if (
+                    selectedDeadline < new Date()
+                ) {
+                    alert(
+                        'Ошибка: время дедлайна не может быть в прошлом!'
+                    );
+
                     return;
                 }
             }
 
+
             const payload = {
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value || null,
+                title:
+                    document.getElementById('title').value,
+
+                description:
+                    document.getElementById('description').value ||
+                    null,
+
                 target_date: target_date,
+
                 reminder_type: reminder_type,
-                deadline_date: deadline_date,
+
                 deadline_time: deadline_time,
+
                 init_data: tg.initData
             };
 
-            const res = await fetch('/api/telegram/todos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
 
-            if (handleAuthError(res)) return;
+            const res = await fetch(
+                '/api/telegram/todos',
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify(payload)
+                }
+            );
+
+
+            if (handleAuthError(res)) {
+                return;
+            }
+
 
             if (res.ok) {
-                document.getElementById('todoForm').reset();
+                document
+                    .getElementById('todoForm')
+                    .reset();
+
                 deadlineBlock.classList.add('hidden');
+
                 switchTab('tasks');
+
             } else {
                 const err = await res.json();
-                alert(err.detail || 'Ошибка при сохранении задачи');
+
+                alert(
+                    err.detail ||
+                    'Ошибка при сохранении задачи'
+                );
             }
         });
 
-        loadTasks();
-    </script>
+
+    loadTasks();
+</script>
 </body>
 </html>
