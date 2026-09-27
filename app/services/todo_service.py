@@ -99,6 +99,18 @@ async def get_todos(
     sort_by: str = "created_at",
     order: str = "desc"
 ):
+    if not 1 <= limit <= 100:
+        raise HTTPException(
+            status_code=400,
+            detail="limit должен быть от 1 до 100"
+        )
+
+    if offset < 0:
+        raise HTTPException(
+            status_code=400,
+            detail="offset не может быть отрицательным"
+        )
+
     sort_fields = {
         "id": ToDo.id,
         "title": ToDo.title,

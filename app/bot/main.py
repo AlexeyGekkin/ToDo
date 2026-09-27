@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher
 from aiogram.client.session.aiohttp import AiohttpSession
 
-from app.config import BOT_TOKEN, BOT_PROXY
+from app.config import BOT_TOKEN
 from app.bot.handlers import router as bot_router
 from app.bot.callbacks import router as callback_router
 from app.bot.middleware import DbSessionMiddleware  # Импортируем
