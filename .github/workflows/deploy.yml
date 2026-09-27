@@ -16,6 +16,7 @@ jobs:
           POSTGRES_USER: todo_user
           POSTGRES_PASSWORD: test_password
           POSTGRES_DB: todo
+          SECRET_KEY: SECRET_KEY
         ports:
           - 5432:5432
         options: >-
