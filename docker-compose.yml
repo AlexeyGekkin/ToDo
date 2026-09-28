@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:17
     restart: unless-stopped
+    mem_limit: 256m
     ports:
       - "5432:5432"
     environment:
@@ -15,8 +16,9 @@ services:
       - bot_net
 
   app:
-    build: .
+    image: ghcr.io/alexeygekkin/todo:latest
     restart: unless-stopped
+    mem_limit: 160m
     env_file:
       - .env
     depends_on:
@@ -27,8 +29,9 @@ services:
       - todo_default
 
   bot:
-    build: .
+    image: ghcr.io/alexeygekkin/todo:latest
     restart: unless-stopped
+    mem_limit: 256m
     env_file:
       - .env
     depends_on:
@@ -39,13 +42,14 @@ services:
         gw_priority: 100
 
   scheduler:
-    build: .
+    image: ghcr.io/alexeygekkin/todo:latest
     restart: unless-stopped
+    mem_limit: 256m
     env_file:
       - .env
     depends_on:
       - db
-    command: [ "python", "-m", "app.scheduler.run" ]
+    command: ["python", "-m", "app.scheduler.run"]
     networks:
       todo_default:
       bot_net:
