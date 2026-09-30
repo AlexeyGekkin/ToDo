@@ -5,7 +5,7 @@ from aiogram.filters import CommandObject, CommandStart
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.bot.keyboards import get_main_keyboard
+from app.bot.keyboards import get_main_keyboard, get_webapp_keyboard
 from app.models.user_model import User
 from app.services.telegram_service import get_profile, get_user_by_telegram_id
 from app.services.todo_service import get_today_todos, get_week_todos
@@ -49,6 +49,11 @@ async def cmd_start(
             "Используй кнопки ниже:",
             reply_markup=get_main_keyboard(),
         )
+
+        await message.answer(
+            "📱 Открыть Mini App:",
+            reply_markup=get_webapp_keyboard(),
+        )
         return
 
     result = await db.execute(
@@ -85,6 +90,11 @@ async def cmd_start(
         f"Теперь ты можешь пользоваться приложением!",
         parse_mode="Markdown",
         reply_markup=get_main_keyboard(),
+    )
+
+    await message.answer(
+        "📱 Открыть Mini App:",
+        reply_markup=get_webapp_keyboard(),
     )
 
 

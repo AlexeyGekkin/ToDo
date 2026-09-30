@@ -18,13 +18,22 @@ def get_main_keyboard() -> ReplyKeyboardMarkup:
             ],
             [
                 KeyboardButton(text="👤 Профиль"),
-                KeyboardButton(
-                    text="📱 Открыть Mini App",
-                    web_app=WebAppInfo(url=WEBAPP_URL),
-                ),
             ],
         ],
         resize_keyboard=True,
+    )
+
+
+def get_webapp_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="📱 Открыть Mini App",
+                    web_app=WebAppInfo(url=WEBAPP_URL),
+                )
+            ]
+        ]
     )
 
 
@@ -33,7 +42,7 @@ def get_danger_zone_kb() -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Удалить аккаунт и все данные",
+                    text="💀 Удалить аккаунт",
                     callback_data="confirm_danger_zone",
                 )
             ]
@@ -46,15 +55,13 @@ def get_final_confirmation_kb() -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Да, всё удалить",
+                    text="Да, удалить всё",
                     callback_data="execute_account_deletion",
-                )
-            ],
-            [
+                ),
                 InlineKeyboardButton(
-                    text="Упс, отмена",
+                    text="Отмена",
                     callback_data="cancel_deletion",
-                )
-            ],
+                ),
+            ]
         ]
     )
