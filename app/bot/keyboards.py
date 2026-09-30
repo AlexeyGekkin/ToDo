@@ -8,14 +8,31 @@ def get_main_keyboard() -> InlineKeyboardMarkup:
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="Открыть Mini App",
-                    web_app=WebAppInfo(url=WEBAPP_URL)
-                )
-            ]
+                    text="📅 Сегодня",
+                    callback_data="today_tasks",
+                ),
+                InlineKeyboardButton(
+                    text="📆 Неделя",
+                    callback_data="week_tasks",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="👤 Профиль",
+                    callback_data="profile",
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="📱 Открыть Mini App",
+                    web_app=WebAppInfo(url=WEBAPP_URL),
+                ),
+            ],
         ]
     )
-def get_danger_zone_kb() -> InlineKeyboardMarkup:
 
+
+def get_danger_zone_kb() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
@@ -29,7 +46,6 @@ def get_danger_zone_kb() -> InlineKeyboardMarkup:
 
 
 def get_final_confirmation_kb() -> InlineKeyboardMarkup:
-
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [

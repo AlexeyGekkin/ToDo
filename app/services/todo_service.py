@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timezone, timedelta
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
@@ -167,6 +167,55 @@ async def get_todos(
     query = query.limit(limit).offset(offset)
 
     result = await db.execute(query)
+
+    return result.scalars().all()
+
+
+async def get_today_todos(
+    user: User,
+    db: AsyncSession,
+):
+    today = datetime.now(
+        ZoneInfo(user.timezone)
+    ).date()
+
+    result = await db.execute(
+        select(ToDo)
+        .where(
+            ToDo.user_id == user.id,
+            ToDo.target_date == today,
+        )
+        .order_by(
+            asc(ToDo.deadline_time),
+            asc(ToDo.id),
+        )
+    )
+
+    return result.scalars().all()
+
+
+async def get_week_todos(
+    user: User,
+    db: AsyncSession,
+):
+    today = datetime.now(
+        ZoneInfo(user.timezone)
+    ).date()
+
+    week_end = today + timedelta(days=6)
+
+    result = await db.execute(
+        select(ToDo)
+        .where(
+            ToDo.user_id == user.id,
+            ToDo.target_date.between(today, week_end),
+        )
+        .order_by(
+            asc(ToDo.target_date),
+            asc(ToDo.deadline_time),
+            asc(ToDo.id),
+        )
+    )
 
     return result.scalars().all()
 
