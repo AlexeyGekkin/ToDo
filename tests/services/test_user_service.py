@@ -3,10 +3,10 @@ from fastapi import HTTPException
 
 from app.schemas.user_schema import UserCreate
 from app.services.user_service import (
-    register_user,
-    get_user_by_email,
     authenticate_user,
     delete_user_account,
+    get_user_by_email,
+    register_user,
 )
 
 

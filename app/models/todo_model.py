@@ -1,22 +1,24 @@
 import enum
 from datetime import date, datetime, time
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Date,
     DateTime,
     Enum,
     ForeignKey,
+    Index,
     String,
     Time,
     func,
     text,
-    Index,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
+if TYPE_CHECKING:
+    from app.models.user_model import User
 
 class ReminderType(str, enum.Enum):
     NONE = "none"
@@ -45,7 +47,7 @@ class ToDo(Base):
         nullable=False
     )
 
-    description: Mapped[Optional[str]] = mapped_column(
+    description: Mapped[str | None] = mapped_column(
         String,
         nullable=True
     )
@@ -55,22 +57,22 @@ class ToDo(Base):
         server_default=text("false")
     )
 
-    target_date: Mapped[Optional[date]] = mapped_column(
+    target_date: Mapped[date | None] = mapped_column(
         Date,
         nullable=True
     )
 
-    deadline_time: Mapped[Optional[time]] = mapped_column(
+    deadline_time: Mapped[time | None] = mapped_column(
         Time,
         nullable=True
     )
 
-    morning_remind_at: Mapped[Optional[datetime]] = mapped_column(
+    morning_remind_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
     )
 
-    deadline_remind_at: Mapped[Optional[datetime]] = mapped_column(
+    deadline_remind_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
     )

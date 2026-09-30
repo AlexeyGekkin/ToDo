@@ -1,8 +1,8 @@
 from fastapi import HTTPException
-from sqlalchemy import select, func, delete
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import User, ToDo
+from app.models import ToDo, User
 
 
 async def get_user_by_telegram_id(
@@ -48,7 +48,7 @@ async def get_profile(
     )
 
     res = await db.execute(stmt)
-    total, active = res.tuple()
+    total, active = res.tuples().one()
 
     return {
         "email": user.email,

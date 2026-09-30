@@ -1,11 +1,12 @@
-from pwdlib import PasswordHash
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+
 from jose import jwt
+from pwdlib import PasswordHash
 
 from app.config import (
-    SECRET_KEY,
-    ALGORITHM,
     ACCESS_TOKEN_EXPIRE_MINUTES,
+    ALGORITHM,
+    SECRET_KEY,
 )
 
 
@@ -13,7 +14,7 @@ def create_access_token(data: dict):
     to_encode = data.copy()
 
     expire = (
-        datetime.now(timezone.utc)
+        datetime.now(UTC)
         + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 

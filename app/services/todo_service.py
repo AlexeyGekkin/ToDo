@@ -1,4 +1,4 @@
-from datetime import date, datetime, time, timezone, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
@@ -33,21 +33,22 @@ def calculate_remind_times(
         )
 
         morning_remind_at = morning_local.astimezone(
-            timezone.utc
+            UTC
         )
 
-    if reminder_type in (ReminderType.DEADLINE, ReminderType.BOTH):
-        if deadline_time:
-            deadline_local = datetime.combine(
-                target_date,
-                deadline_time,
-                tzinfo=timezone_info,
-            )
+    if (
+            reminder_type in (ReminderType.DEADLINE, ReminderType.BOTH)
+            and deadline_time
+    ):
+        deadline_local = datetime.combine(
+            target_date,
+            deadline_time,
+            tzinfo=timezone_info,
+        )
 
-            deadline_remind_at = deadline_local.astimezone(
-                timezone.utc
-            )
-
+        deadline_remind_at = deadline_local.astimezone(
+            UTC
+        )
     return morning_remind_at, deadline_remind_at
 
 

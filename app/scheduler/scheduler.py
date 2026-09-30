@@ -14,27 +14,26 @@ async def process_reminders():
         reminders = await get_due_reminders(db)
 
         for reminder in reminders:
-            todo = reminder["todo"]
+            todo = reminder.todo
 
             try:
                 sent = await send_reminder(
                     bot,
                     todo.user,
                     todo,
-                    reminder["is_missed"],
+                    reminder.is_missed,
                 )
 
                 if sent:
-                    await complete_reminder(
-                        reminder,
-                        db,
-                    )
+                    complete_reminder(reminder)
 
             except Exception as exc:
                 print(
                     f"Ошибка отправки напоминания "
                     f"для задачи {todo.id}: {exc}"
                 )
+
+        await db.commit()
 
 
 def create_scheduler() -> AsyncIOScheduler:

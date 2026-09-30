@@ -1,23 +1,22 @@
-from fastapi import Depends, APIRouter
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db
-from app.services.telegram_auth_service import validate_init_data
-from app.services.telegram_service import (
-    get_user_by_telegram_id,
-    get_profile,
-    delete_webapp_account,
-)
-from app.services.todo_service import (
-    get_todos,
-    create_todo,
-    update_todo,
-)
 from app.schemas.todo_schema import (
     ToDoCreate,
     ToDoUpdate,
 )
-
+from app.services.telegram_auth_service import validate_init_data
+from app.services.telegram_service import (
+    delete_webapp_account,
+    get_profile,
+    get_user_by_telegram_id,
+)
+from app.services.todo_service import (
+    create_todo,
+    get_todos,
+    update_todo,
+)
 
 router = APIRouter(
     prefix="/api/telegram",

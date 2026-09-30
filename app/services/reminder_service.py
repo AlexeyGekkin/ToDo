@@ -1,10 +1,19 @@
-from datetime import datetime, timedelta, timezone
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
 
-from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.todo_model import ToDo
+
+
+@dataclass
+class Reminder:
+    todo: ToDo
+    reminder_type: str
+    remind_at: datetime
+    is_missed: bool
 
 
 def build_reminder(
@@ -12,19 +21,19 @@ def build_reminder(
     reminder_type: str,
     remind_at: datetime,
     missed_after: datetime,
-) -> dict:
-    return {
-        "todo": todo,
-        "type": reminder_type,
-        "remind_at": remind_at,
-        "is_missed": remind_at < missed_after,
-    }
+) -> Reminder:
+    return Reminder(
+        todo=todo,
+        reminder_type=reminder_type,
+        remind_at=remind_at,
+        is_missed=remind_at < missed_after,
+    )
 
 
 async def get_due_reminders(
     db: AsyncSession,
-) -> list[dict]:
-    now = datetime.now(timezone.utc)
+) -> list[Reminder]:
+    now = datetime.now(UTC)
     missed_after = now - timedelta(minutes=5)
 
     query = (
@@ -33,15 +42,15 @@ async def get_due_reminders(
         .where(
             ToDo.completed.is_(False),
             (
-                    (
-                            ToDo.morning_remind_at.is_not(None)
-                            & (ToDo.morning_remind_at <= now)
-                    )
-                    |
-                    (
-                            ToDo.deadline_remind_at.is_not(None)
-                            & (ToDo.deadline_remind_at <= now)
-                    )
+                (
+                    ToDo.morning_remind_at.is_not(None)
+                    & (ToDo.morning_remind_at <= now)
+                )
+                |
+                (
+                    ToDo.deadline_remind_at.is_not(None)
+                    & (ToDo.deadline_remind_at <= now)
+                )
             ),
         )
     )
@@ -69,21 +78,17 @@ async def get_due_reminders(
                 )
 
     reminders.sort(
-        key=lambda reminder: reminder["remind_at"]
+        key=lambda reminder: reminder.remind_at
     )
 
     return reminders
 
-async def complete_reminder(
-    reminder: dict,
-    db: AsyncSession,
+
+def complete_reminder(
+    reminder: Reminder,
 ) -> None:
-    todo = reminder["todo"]
+    if reminder.reminder_type == "morning":
+        reminder.todo.morning_remind_at = None
 
-    if reminder["type"] == "morning":
-        todo.morning_remind_at = None
-
-    elif reminder["type"] == "deadline":
-        todo.deadline_remind_at = None
-
-    await db.commit()
+    elif reminder.reminder_type == "deadline":
+        reminder.todo.deadline_remind_at = None

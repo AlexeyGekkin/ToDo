@@ -1,6 +1,6 @@
 import asyncio
-from logging.config import fileConfig
 import sys
+from logging.config import fileConfig
 from pathlib import Path
 
 from sqlalchemy import pool
@@ -13,7 +13,6 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from app.config import DATABASE_URL
 from app.database import Base
-import app.models
 
 config = context.config
 

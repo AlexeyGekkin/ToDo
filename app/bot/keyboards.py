@@ -1,34 +1,30 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    WebAppInfo,
+)
 
 WEBAPP_URL = "https://gekkin.ru/webapp"
 
 
-def get_main_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
+def get_main_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
             [
-                InlineKeyboardButton(
-                    text="📅 Сегодня",
-                    callback_data="today_tasks",
-                ),
-                InlineKeyboardButton(
-                    text="📆 Неделя",
-                    callback_data="week_tasks",
-                ),
+                KeyboardButton(text="📅 Сегодня"),
+                KeyboardButton(text="📆 Неделя"),
             ],
             [
-                InlineKeyboardButton(
-                    text="👤 Профиль",
-                    callback_data="profile",
-                ),
-            ],
-            [
-                InlineKeyboardButton(
+                KeyboardButton(text="👤 Профиль"),
+                KeyboardButton(
                     text="📱 Открыть Mini App",
                     web_app=WebAppInfo(url=WEBAPP_URL),
                 ),
             ],
-        ]
+        ],
+        resize_keyboard=True,
     )
 
 

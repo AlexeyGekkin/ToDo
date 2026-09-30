@@ -4,17 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from app import schemas
-
 from app.dependencies import get_current_user, get_db
 from app.models import User
-
 from app.services.user_service import (
-    register_user,
     authenticate_user,
-    delete_user_account,
     create_telegram_link,
+    delete_user_account,
+    register_user,
 )
-
 
 router = APIRouter(
     prefix="/users",

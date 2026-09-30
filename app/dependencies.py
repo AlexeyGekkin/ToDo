@@ -1,12 +1,12 @@
 from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import ALGORITHM, SECRET_KEY
 from app.database import SessionLocal
 from app.models import User
-from app.config import SECRET_KEY, ALGORITHM
 
 security = HTTPBearer()
 

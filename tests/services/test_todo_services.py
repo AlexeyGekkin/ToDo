@@ -1,20 +1,20 @@
-import pytest
-from datetime import date, time, datetime, timezone
+from datetime import UTC, date, datetime, time
 
+import pytest
 from fastapi import HTTPException
 
 from app.models.todo_model import ReminderType
 from app.schemas.todo_schema import ToDoCreate, ToDoUpdate
+from app.schemas.user_schema import UserCreate
 from app.services.todo_service import (
+    calculate_remind_times,
     create_todo,
-    get_user_todo,
-    update_todo,
     delete_todo,
     get_todos,
-    calculate_remind_times,
+    get_user_todo,
+    update_todo,
 )
 from app.services.user_service import register_user
-from app.schemas.user_schema import UserCreate
 
 
 def test_calculate_remind_times_deadline():
@@ -33,7 +33,7 @@ def test_calculate_remind_times_deadline():
         10,
         14,
         30,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
 
 
@@ -52,7 +52,7 @@ def test_calculate_remind_times_morning():
         10,
         4,
         0,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
     assert deadline_remind_at is None
 
@@ -72,7 +72,7 @@ def test_calculate_remind_times_both():
         10,
         4,
         0,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
     assert deadline_remind_at == datetime(
         2026,
@@ -80,7 +80,7 @@ def test_calculate_remind_times_both():
         10,
         14,
         30,
-        tzinfo=timezone.utc,
+        tzinfo=UTC,
     )
 
 

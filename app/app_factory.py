@@ -3,9 +3,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.routers import (
-    user_router,
-    todo_router,
     telegram_router,
+    todo_router,
+    user_router,
 )
 
 templates = Jinja2Templates(directory="app/templates")
