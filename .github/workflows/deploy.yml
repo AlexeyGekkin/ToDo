@@ -27,6 +27,7 @@ jobs:
     env:
       DATABASE_URL: postgresql+asyncpg://todo_user:test_password@127.0.0.1:5432/todo
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      BOT_TOKEN: "123456789:TEST_TOKEN_FOR_GITHUB_ACTIONS"
 
     steps:
       - name: Checkout
