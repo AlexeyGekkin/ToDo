@@ -9,9 +9,14 @@ def build_reminder_message(
     is_missed: bool,
 ) -> str:
     if is_missed:
-        return f'Извините, пропущена задача: «{todo.title}»'
+        message = f'Извините, пропущена задача: «{todo.title}»'
+    else:
+        message = f'Напоминание: «{todo.title}»'
 
-    return f'Напоминание: «{todo.title}»'
+    if todo.description:
+        message += f"\nОписание: {todo.description}"
+
+    return message
 
 
 async def send_reminder(

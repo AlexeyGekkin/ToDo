@@ -16,7 +16,9 @@ async def test_send_reminder_without_telegram_id():
     )
 
     todo = SimpleNamespace(
-        title="Test todo"
+        title="Test todo",
+        description=None,
+
     )
 
     result = await send_reminder(
@@ -40,7 +42,8 @@ async def test_send_reminder():
     )
 
     todo = SimpleNamespace(
-        title="Купить молоко"
+        title="Купить молоко",
+        description=None,
     )
 
     result = await send_reminder(
@@ -68,7 +71,8 @@ async def test_send_missed_reminder():
     )
 
     todo = SimpleNamespace(
-        title="Оплатить интернет"
+        title="Оплатить интернет",
+        description=None,
     )
 
     result = await send_reminder(
@@ -83,4 +87,36 @@ async def test_send_missed_reminder():
     bot.send_message.assert_awaited_once_with(
         chat_id=123456,
         text="Извините, пропущена задача: «Оплатить интернет»",
+    )
+
+@pytest.mark.asyncio
+async def test_send_reminder_with_description():
+    bot = SimpleNamespace(
+        send_message=AsyncMock()
+    )
+
+    user = SimpleNamespace(
+        telegram_id=123456
+    )
+
+    todo = SimpleNamespace(
+        title="Купить молоко",
+        description="2 литра, 3.2%",
+    )
+
+    result = await send_reminder(
+        bot,
+        user,
+        todo,
+        is_missed=False,
+    )
+
+    assert result is True
+
+    bot.send_message.assert_awaited_once_with(
+        chat_id=123456,
+        text=(
+            "Напоминание: «Купить молоко»\n"
+            "Описание: 2 литра, 3.2%"
+        ),
     )

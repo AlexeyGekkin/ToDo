@@ -3,14 +3,25 @@ services:
     image: postgres:17
     restart: unless-stopped
     mem_limit: 256m
+
     ports:
       - "5432:5432"
+
     environment:
       POSTGRES_DB: todo
       POSTGRES_USER: todo_user
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo_user -d todo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
     networks:
       - todo_default
       - bot_net
@@ -19,12 +30,30 @@ services:
     image: ghcr.io/alexeygekkin/todo:latest
     restart: unless-stopped
     mem_limit: 160m
+
     env_file:
       - .env
+
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
     ports:
       - "127.0.0.1:8000:8000"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
     networks:
       - todo_default
 
@@ -32,11 +61,16 @@ services:
     image: ghcr.io/alexeygekkin/todo:latest
     restart: unless-stopped
     mem_limit: 256m
+
     env_file:
       - .env
+
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
     command: ["python", "-m", "app.bot.run"]
+
     networks:
       bot_net:
         gw_priority: 100
@@ -45,11 +79,16 @@ services:
     image: ghcr.io/alexeygekkin/todo:latest
     restart: unless-stopped
     mem_limit: 256m
+
     env_file:
       - .env
+
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
     command: ["python", "-m", "app.scheduler.run"]
+
     networks:
       todo_default:
       bot_net:

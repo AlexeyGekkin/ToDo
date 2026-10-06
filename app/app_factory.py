@@ -1,4 +1,8 @@
-from fastapi import FastAPI, Request
+from sqlalchemy import text
+
+from app.dependencies import get_db
+
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -23,6 +27,11 @@ def create_app(with_bot: bool = True) -> FastAPI:
     app.include_router(user_router)
     app.include_router(todo_router)
     app.include_router(telegram_router)
+
+    @app.get("/health", include_in_schema=False)
+    async def health(db=Depends(get_db)):
+        await db.execute(text("SELECT 1"))
+        return {"status": "ok"}
 
     @app.get("/", response_class=HTMLResponse)
     async def root(request: Request):
