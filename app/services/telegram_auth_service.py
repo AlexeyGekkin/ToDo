@@ -16,14 +16,24 @@ def validate_init_data(init_data: str) -> int:
     if telegram_hash is None:
         raise HTTPException(status_code=401, detail="Missing hash")
 
-    # Проверка времени жизни строки авторизации (Replay Attack Protection)
     auth_date_list = parsed.get("auth_date", [None])
     if not auth_date_list or not auth_date_list[0].isdigit():
         raise HTTPException(status_code=401, detail="Missing or invalid auth_date")
 
     auth_date = int(auth_date_list[0])
-    if time.time() - auth_date > 86400:  # Токен действителен ровно 24 часа
-        raise HTTPException(status_code=401, detail="Init data has expired")
+    now = time.time()
+
+    if auth_date > now + 600:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid auth_date",
+        )
+
+    if now - auth_date > 86400:
+        raise HTTPException(
+            status_code=401,
+            detail="Init data has expired",
+        )
 
     data_check_string = "\n".join(
         f"{key}={value[0]}" for key, value in sorted(parsed.items())

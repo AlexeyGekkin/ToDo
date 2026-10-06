@@ -67,7 +67,7 @@ async def get_due_reminders(
         ]
 
         for reminder_type, remind_at in reminder_times:
-            if remind_at is not None:
+            if remind_at is not None and remind_at <= now:
                 reminders.append(
                     build_reminder(
                         todo,

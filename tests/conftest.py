@@ -1,3 +1,4 @@
+import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
@@ -9,6 +10,11 @@ from sqlalchemy.pool import StaticPool
 from app.app_factory import create_app
 from app.database import Base
 from app.dependencies import get_db
+
+from app.services.rate_limit_service import (
+    login_rate_limiter,
+    register_rate_limiter,
+)
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -91,3 +97,13 @@ async def second_auth_token(client):
     )
 
     return response.json()["access_token"]
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiters():
+    login_rate_limiter.clear()
+    register_rate_limiter.clear()
+
+    yield
+
+    login_rate_limiter.clear()
+    register_rate_limiter.clear()

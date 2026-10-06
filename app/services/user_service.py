@@ -86,6 +86,18 @@ async def authenticate_user(
         "token_type": "bearer"
     }
 
+async def update_user_timezone(
+    user: User,
+    timezone: str,
+    db: AsyncSession,
+) -> User:
+    user.timezone = timezone
+
+    await db.commit()
+    await db.refresh(user)
+
+    return user
+
 async def delete_user_account(user: User, db: AsyncSession) -> dict:
 
     await db.delete(user)

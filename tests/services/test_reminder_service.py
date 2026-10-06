@@ -1,11 +1,37 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock
 
-from app.models.todo_model import ReminderType, ToDo
+import pytest
+
+from app.models import ToDo, ReminderType
 from app.services.reminder_service import (
     build_reminder,
     complete_reminder,
+    get_due_reminders,
 )
 
+@pytest.mark.asyncio
+async def test_get_due_reminders_does_not_return_future_reminder():
+    now = datetime.now(UTC)
+
+    todo = ToDo(
+        title="Test",
+        completed=False,
+        morning_remind_at=now - timedelta(minutes=10),
+        deadline_remind_at=now + timedelta(hours=1),
+        reminder_type=ReminderType.BOTH,
+    )
+
+    db = AsyncMock()
+
+    result = MagicMock()
+    result.scalars.return_value.all.return_value = [todo]
+    db.execute.return_value = result
+
+    reminders = await get_due_reminders(db)
+
+    assert len(reminders) == 1
+    assert reminders[0].reminder_type == "morning"
 
 def test_build_reminder_not_missed():
 

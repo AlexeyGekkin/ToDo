@@ -125,3 +125,31 @@ async def test_login_wrong_password(client):
 
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid credentials"
+
+@pytest.mark.asyncio
+async def test_update_user_timezone(client, auth_token):
+    response = await client.patch(
+        "/users/me",
+        json={"timezone": "Asia/Yekaterinburg"},
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["timezone"] == "Asia/Yekaterinburg"
+
+    response = await client.get(
+        "/users/me",
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+
+    assert response.json()["timezone"] == "Asia/Yekaterinburg"
+
+@pytest.mark.asyncio
+async def test_user_default_timezone(client, auth_token):
+    response = await client.get(
+        "/users/me",
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["timezone"] == "Europe/Samara"

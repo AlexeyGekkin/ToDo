@@ -26,14 +26,15 @@ async def process_reminders():
 
                 if sent:
                     complete_reminder(reminder)
+                    await db.commit()
 
             except Exception as exc:
+                await db.rollback()
+
                 print(
                     f"Ошибка отправки напоминания "
                     f"для задачи {todo.id}: {exc}"
                 )
-
-        await db.commit()
 
 
 def create_scheduler() -> AsyncIOScheduler:
