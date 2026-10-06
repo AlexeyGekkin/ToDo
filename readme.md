@@ -1,330 +1,196 @@
-# ToDo API
+# ToDo
 
-Асинхронное backend-приложение для управления задачами на FastAPI с JWT-аутентификацией, PostgreSQL, Telegram Mini App и системой напоминаний.
+![Deploy](https://github.com/AlexeyGekkin/ToDo/actions/workflows/deploy.yml/badge.svg)
 
-Проект разработан как учебный и портфолио-проект с упором на практику backend-разработки: работа с асинхронным API и БД, миграциями, авторизацией, Telegram API, фоновыми задачами, Docker и CI/CD.
+Backend-oriented task manager built with FastAPI, PostgreSQL and Telegram integration.
 
-## Возможности
+The project is deployed and used as a production-style portfolio project: the API, Telegram bot and reminder scheduler run as separate processes in Docker, database migrations are managed with Alembic, and every push to `main` goes through tests, image build and automated deployment.
 
-* регистрация и авторизация пользователей;
-* JWT-аутентификация;
-* хеширование паролей с Argon2id;
-* CRUD для задач;
-* пагинация, фильтрация и сортировка задач;
-* указание даты и времени дедлайна;
-* два независимых типа напоминаний:
+**Live:** https://gekkin.ru  
+**Swagger:** https://gekkin.ru/docs
 
-  * утреннее;
-  * в момент дедлайна;
-* комбинированный режим напоминаний;
-* Telegram-бот;
-* Telegram Mini App;
-* привязка Telegram-аккаунта к пользователю;
-* удаление аккаунта вместе с задачами;
-* отдельный процесс для обработки напоминаний.
+## What the project does
 
-## Стек
+- user registration and JWT authentication;
+- password hashing with Argon2id;
+- CRUD for tasks with pagination, filtering and sorting;
+- deadlines and user time zones;
+- morning and deadline reminders;
+- Telegram bot with task lists and account linking;
+- Telegram Mini App;
+- secure Telegram `init_data` validation with HMAC-SHA256;
+- one-time Telegram linking tokens with a 15-minute lifetime;
+- account deletion together with user tasks;
+- rate limiting for login and registration;
+- health checks for the API and PostgreSQL;
+- automated Docker build and deployment through GitHub Actions.
 
-### Backend
-
-* Python 3.12
-* FastAPI
-* SQLAlchemy 2.x
-* Pydantic v2
-* Python-JOSE
-* pwdlib + Argon2
-* APScheduler
-
-### Database
-
-* PostgreSQL 17
-* Alembic
-* asyncpg
-
-### Telegram
-
-* aiogram 3
-* Telegram WebApp JavaScript SDK
-* HMAC-SHA256 для проверки `init_data`
-
-### Testing
-
-* pytest
-* pytest-asyncio
-* aiosqlite
-* unittest.mock
-
-### Infrastructure
-
-* Docker
-* Docker Compose
-* Nginx
-* Certbot
-* GitHub Actions
-* GitHub Container Registry
-* systemd
-* SSH L3-туннель
-
-## Архитектура
-
-Приложение состоит из нескольких независимых процессов, запускаемых из одного Docker-образа:
+## Architecture
 
 ```text
-                    ┌──────────────┐
-                    │    Nginx     │
-                    │ Reverse Proxy│
-                    │   + SSL      │
-                    └──────┬───────┘
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │   FastAPI    │
-                    │     app      │
-                    └──────┬───────┘
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │  PostgreSQL  │
-                    └──────────────┘
+                    Internet
+                       │
+                       ▼
+                 ┌───────────┐
+                 │   Nginx   │
+                 │ HTTPS/TLS │
+                 └─────┬─────┘
+                       │
+                       ▼
+                 ┌───────────┐
+                 │  FastAPI  │
+                 │    app    │
+                 └─────┬─────┘
+                       │
+                       ▼
+                 ┌───────────┐
+                 │PostgreSQL │
+                 └───────────┘
 
-Telegram
+Telegram ───────► bot ─────────────► PostgreSQL
+                    │
+                    └──────────────► Telegram Bot API
+
+scheduler ──────► PostgreSQL
     │
-    ▼
-┌──────────────┐
-│     bot      │
-│   aiogram    │
-└──────┬───────┘
-       │
-       ▼
-   PostgreSQL
-
-
-┌──────────────┐
-│  scheduler   │
-│ APScheduler  │
-└──────┬───────┘
-       │
-       ├── PostgreSQL
-       │
-       └── Telegram Bot API
+    └────────────► Telegram Bot API
 ```
 
-`app`, `bot` и `scheduler` используют один Docker-образ, но запускаются с разными командами.
+`app`, `bot` and `scheduler` are built from the same Docker image but run with different commands.
 
-## Структура проекта
+The API is exposed only through Nginx. The application port is bound to localhost on the host, and PostgreSQL is available only inside Docker networks.
+
+Telegram-related processes use a separate Docker network for outbound Telegram traffic.
+
+## Backend structure
 
 ```text
 app/
-├── bot/
-│   ├── callbacks.py
-│   ├── handlers.py
-│   ├── keyboards.py
-│   ├── main.py
-│   ├── middleware.py
-│   └── run.py
-│
-├── models/
-│   ├── todo_model.py
-│   └── user_model.py
-│
-├── notifications/
-│   └── telegram.py
-│
-├── routers/
-│   ├── telegram_router.py
-│   ├── todo_router.py
-│   └── user_router.py
-│
-├── scheduler/
-│   ├── run.py
-│   └── scheduler.py
-│
-├── schemas/
-│   ├── todo_schema.py
-│   └── user_schema.py
-│
-├── services/
-│   ├── auth_service.py
-│   ├── reminder_service.py
-│   ├── telegram_auth_service.py
-│   ├── telegram_service.py
-│   ├── todo_service.py
-│   └── user_service.py
-│
+├── bot/                # aiogram handlers, callbacks and middleware
+├── models/             # SQLAlchemy models
+├── notifications/      # Telegram notifications
+├── routers/            # FastAPI endpoints
+├── scheduler/          # APScheduler process
+├── schemas/            # Pydantic schemas
+├── services/           # business logic
+├── templates/          # browser UI and Telegram Mini App
+├── app_factory.py
+├── config.py
 ├── database.py
 ├── dependencies.py
-├── config.py
-├── lifespan.py
-├── app_factory.py
 └── main.py
 ```
 
-В проекте используется разделение на:
+The HTTP layer is kept in `routers`; application logic lives in `services`; database models and API schemas are separated.
 
-* `routers` — HTTP-эндпоинты;
-* `services` — бизнес-логика и работа с данными;
-* `models` — модели SQLAlchemy;
-* `schemas` — Pydantic-схемы;
-* `bot` — Telegram-бот;
-* `scheduler` — обработка напоминаний;
-* `notifications` — отправка уведомлений.
+## Authentication and security
 
-## Аутентификация
+The REST API uses JWT access tokens. Passwords are never stored in plain text and are hashed with Argon2id.
 
-Для API используется JWT.
+Protected task queries always include the current user ID, so a user cannot access another user's task by changing an object ID.
 
-Основные endpoints:
+Telegram Mini App requests are authenticated by validating Telegram `init_data`:
 
-```text
-POST /users/register
-POST /users/login
-GET  /users/me
-```
+1. verify the HMAC-SHA256 signature;
+2. validate `auth_date`;
+3. extract the Telegram user ID;
+4. resolve the linked application user.
 
-Пароли не хранятся в исходном виде. Для хеширования используется Argon2id.
+Telegram account linking uses a cryptographically random, single-use token that expires after 15 minutes.
 
-JWT содержит идентификатор пользователя и используется для авторизации защищённых endpoints.
+Authentication endpoints also include application-level rate limiting. Nginx forwards the real client address to Uvicorn, while direct access to the application port is blocked.
 
-## Telegram Mini App
+Secrets are supplied through environment variables and GitHub Secrets and are not committed to the repository.
 
-Telegram Mini App использует стандартный механизм авторизации Telegram Web App.
+## Reminders and time zones
 
-Клиент передаёт `tg.initData` на backend:
+A task supports four reminder modes:
 
 ```text
-/api/telegram/...
+none
+morning
+deadline
+both
 ```
 
-Backend:
+The user stores an IANA time zone such as `Europe/Samara`.
 
-1. получает `init_data`;
-2. проверяет цифровую подпись;
-3. получает Telegram ID пользователя;
-4. находит связанного пользователя;
-5. выполняет операцию от его имени.
-
-Для проверки используется HMAC-SHA256.
-
-Дополнительно проверяется `auth_date`, чтобы не принимать устаревшие данные авторизации.
-
-### Привязка Telegram
-
-Для привязки аккаунта используется одноразовый токен.
-
-Токен:
-
-* генерируется сервером;
-* хранится в БД;
-* имеет ограниченный срок действия — 15 минут;
-* после использования связывает Telegram ID с аккаунтом пользователя.
-
-## Напоминания
-
-Для задач можно выбрать один из режимов:
+Reminder timestamps are calculated in the user's time zone and stored as UTC moments in PostgreSQL:
 
 ```text
-NONE      — без напоминаний
-MORNING   — только утреннее
-DEADLINE  — только в момент дедлайна
-BOTH      — оба напоминания
+user local time
+      │
+      ▼
+ZoneInfo conversion
+      │
+      ▼
+UTC timestamp in DB
+      │
+      ▼
+scheduler
+      │
+      ▼
+Telegram notification
 ```
 
-Утреннее напоминание создаётся на 08:00 локального времени пользователя.
+Morning reminders are scheduled for 08:00 local time. Deadline reminders use the task date and deadline time.
 
-Напоминание о дедлайне создаётся на указанное пользователем время.
+The scheduler runs once per minute. Morning and deadline reminders have separate database fields, so the `both` mode is processed independently. Successfully sent reminders are cleared only after the Telegram message has been sent and the database transaction is committed.
 
-## Scheduler
+If a reminder is more than five minutes late, the notification is marked as missed.
 
-Обработка напоминаний вынесена в отдельный контейнер.
+## Main API endpoints
 
-Scheduler запускает проверку один раз в минуту:
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/users/register` | Register user |
+| POST | `/users/login` | Get JWT |
+| GET | `/users/me` | Current user |
+| PATCH | `/users/me` | Update time zone |
+| DELETE | `/users/me` | Delete account |
+| GET | `/users/telegram/link-url` | Create Telegram linking URL |
+| GET | `/todos/` | List tasks |
+| POST | `/todos/` | Create task |
+| GET | `/todos/{id}` | Get task |
+| PATCH | `/todos/{id}` | Update task |
+| DELETE | `/todos/{id}` | Delete task |
+| GET | `/api/telegram/profile` | Mini App profile |
+| GET | `/api/telegram/todos` | Mini App tasks |
+| POST | `/api/telegram/todos` | Create task from Mini App |
+| PATCH | `/api/telegram/todos/{id}` | Update task from Mini App |
+| DELETE | `/api/telegram/account` | Delete account from Mini App |
+| GET | `/health` | Application/database health |
 
-```text
-APScheduler
-     │
-     ▼
-get_due_reminders()
-     │
-     ▼
-поиск наступивших напоминаний
-     │
-     ▼
-отправка сообщения в Telegram
-     │
-     ▼
-очистка отправленного напоминания
-     │
-     ▼
-commit
-```
+## Testing
 
-Для загрузки пользователя вместе с задачей используется `selectinload`, что позволяет избежать проблемы N+1 при обращении к связанным пользователям.
+The test suite currently contains **70 automated tests**.
 
-У каждого типа напоминания своё поле в БД. Поэтому при режиме `BOTH` утреннее и дедлайновое напоминания обрабатываются независимо.
+Tests cover:
 
-Если отправка прошла успешно, соответствующее напоминание удаляется из задачи.
+- registration, authentication and protected endpoints;
+- task CRUD and ownership isolation;
+- validation and reminder calculations;
+- Telegram `init_data` signature and expiration;
+- Telegram service logic;
+- scheduler success and failure scenarios;
+- notification formatting;
+- registration rate limiting.
 
-Для просроченных напоминаний используется отдельное правило обработки: напоминание считается пропущенным, если его время старше 5 минут.
+Run locally:
 
-Scheduler настроен с:
-
-```python
-max_instances=1
-coalesce=True
-```
-
-Это предотвращает одновременный запуск нескольких экземпляров одной задачи и объединяет пропущенные запуски.
-
-## Alembic
-
-Изменения структуры базы данных выполняются через Alembic.
-
-Основные команды:
-
-```powershell
-uv run alembic upgrade head
-```
-
-Создание новой миграции:
-
-```powershell
-uv run alembic revision --autogenerate -m "description"
-```
-
-## Тестирование
-
-Тесты разделены на API и сервисный слой:
-
-```text
-tests/
-├── api/
-│   ├── test_auth.py
-│   └── test_todo.py
-│
-└── services/
-    ├── test_todo_services.py
-    └── test_user_service.py
-```
-
-Для тестов используется отдельная SQLite-база в памяти.
-
-Запуск:
-
-```powershell
+```bash
 uv run pytest
 ```
 
-Проверка качества кода:
+Static checks:
 
-```powershell
+```bash
 uv run ruff check .
 ```
 
-Ruff используется как локальный инструмент проверки кода. В CI он не является обязательным этапом деплоя.
-
 ## Docker
 
-Docker Compose запускает четыре основных сервиса:
+Docker Compose runs four services:
 
 ```text
 db
@@ -333,227 +199,91 @@ bot
 scheduler
 ```
 
-`app`, `bot` и `scheduler` используют один Docker-образ с разными командами запуска.
+PostgreSQL and FastAPI have health checks. `app`, `bot` and `scheduler` wait until PostgreSQL is healthy before starting.
 
-Пример:
-
-```yaml
-app:
-  image: ghcr.io/alexeygekkin/todo:latest
-
-bot:
-  image: ghcr.io/alexeygekkin/todo:latest
-  command: ["python", "-m", "app.bot.run"]
-
-scheduler:
-  image: ghcr.io/alexeygekkin/todo:latest
-  command: ["python", "-m", "app.scheduler.run"]
-```
-
-Для Telegram-бота и scheduler используется отдельная Docker-сеть.
-
-## Сетевая инфраструктура
-
-На сервере используется отдельная Docker-сеть для Telegram-бота и scheduler.
-
-На уровне хоста настроен SSH L3-туннель до NAT VPS.
-
-Туннель поддерживается systemd-сервисом:
-
-```text
-natvps-tunnel.service
-```
-
-Сервис запускает:
-
-```text
-/usr/local/sbin/natvps-tunnel.sh
-```
-
-и автоматически перезапускает туннель при завершении процесса:
-
-```ini
-Restart=always
-RestartSec=5
-```
-
-Для туннеля используется интерфейс:
-
-```text
-tun0
-```
-
-Nginx используется как reverse proxy и отвечает за HTTPS.
+The application container runs Alembic migrations before starting Uvicorn.
 
 ## CI/CD
 
-Для проекта настроен GitHub Actions.
-
-Pipeline состоит из трёх этапов:
+The GitHub Actions pipeline is:
 
 ```text
-tests
-  │
-  ▼
-build
-  │
-  ▼
-deploy
-```
-
-### Tests
-
-GitHub Actions запускает PostgreSQL 17 как service container, устанавливает зависимости и выполняет:
-
-```powershell
-uv run pytest
-```
-
-### Build
-
-После успешного прохождения тестов собирается Docker-образ и отправляется в GitHub Container Registry.
-
-```text
-GitHub Actions
-      │
-      ▼
+push to main
+     │
+     ▼
+   tests
+     │
+     ▼
 Docker build
-      │
-      ▼
-GHCR
+     │
+     ▼
+    GHCR
+     │
+     ▼
+SSH deploy
+     │
+     ▼
+Docker Compose
 ```
 
-### Deploy
+The image is published to GitHub Container Registry and then pulled by the VPS during deployment.
 
-После успешной сборки GitHub Actions подключается к серверу по SSH и выполняет:
+## Local development
 
-```text
-git fetch origin main
-git reset --hard origin/main
-docker pull ...
-docker compose up -d
+Requirements:
+
+- Python 3.12+
+- PostgreSQL
+- `uv`
+
+Install dependencies:
+
+```bash
+uv sync --dev
 ```
 
-Таким образом, изменение в `main` запускает тестирование, сборку Docker-образа и последующий деплой.
-
-## Переменные окружения
-
-Основные переменные:
+Create `.env` from `.env.example` and configure:
 
 ```env
-DATABASE_URL=postgresql+asyncpg://todo_user:password@db:5432/todo
-
-BOT_TOKEN=...
-
-SECRET_KEY=...
-
+DATABASE_URL=postgresql+asyncpg://todo_user:password@127.0.0.1:5432/todo
+BOT_TOKEN=your_bot_token
+SECRET_KEY=your_secret_key
 ALGORITHM=HS256
-
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-Секретные значения не хранятся в исходном коде.
+Apply migrations:
 
-Для GitHub Actions используются GitHub Secrets.
-
-## Что реализовано в проекте
-
-В рамках проекта реализованы и изучены:
-
-* асинхронный FastAPI;
-* асинхронная работа с PostgreSQL через SQLAlchemy;
-* Pydantic-схемы;
-* JWT-аутентификация;
-* безопасное хранение паролей с Argon2id;
-* Alembic и миграции БД;
-* Telegram Bot API через aiogram;
-* Telegram Mini App;
-* проверка Telegram `init_data`;
-* APScheduler;
-* Docker Compose;
-* отдельные процессы для API, бота и scheduler;
-* автоматическое тестирование;
-* GitHub Actions;
-* сборка и публикация Docker-образов в GHCR;
-* автоматический деплой на VPS;
-* настройка Nginx и HTTPS;
-* SSH L3-туннель через `tun0`.
-
-<details>
-<summary>Примеры API</summary>
-
-### Регистрация
-
-```http
-POST /users/register
-```
-
-### Авторизация
-
-```http
-POST /users/login
-```
-
-### Текущий пользователь
-
-```http
-GET /users/me
-```
-
-### Задачи
-
-```http
-GET    /todos
-POST   /todos
-PATCH  /todos/{todo_id}
-DELETE /todos/{todo_id}
-```
-
-### Telegram Mini App
-
-```http
-GET    /api/telegram/profile
-GET    /api/telegram/todos
-POST   /api/telegram/todos
-PATCH  /api/telegram/todos/{todo_id}
-DELETE /api/telegram/account
-```
-
-</details>
-
-<details>
-<summary>Запуск локально</summary>
-
-Установить зависимости:
-
-```powershell
-uv sync
-```
-
-Настроить переменные окружения в `.env`.
-
-Запустить миграции:
-
-```powershell
+```bash
 uv run alembic upgrade head
 ```
 
-Запустить приложение:
+Start the API:
 
-```powershell
+```bash
 uv run uvicorn app.main:app --reload
 ```
 
-Запустить тесты:
+Run tests:
 
-```powershell
+```bash
 uv run pytest
 ```
 
-Проверить код:
+## Technology stack
 
-```powershell
-uv run ruff check .
-```
+**Backend:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.x, asyncpg  
+**Database:** PostgreSQL 17, Alembic  
+**Authentication:** JWT, Argon2id  
+**Telegram:** aiogram 3, Telegram Mini Apps, HMAC-SHA256  
+**Background jobs:** APScheduler  
+**Testing:** pytest, pytest-asyncio  
+**Infrastructure:** Docker, Docker Compose, Nginx, GitHub Actions, GHCR
 
-</details>
+## Scaling notes
+
+The current rate limiter is intentionally in-memory and matches the current single API process. With multiple API replicas it should be moved to a shared store such as Redis.
+
+The scheduler is also designed to run as a single instance. Horizontal scaling would require distributed locking or a queue-based worker model.
+
+These trade-offs keep the deployed project small while preserving clear upgrade paths for a larger system.
