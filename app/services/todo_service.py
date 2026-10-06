@@ -319,12 +319,6 @@ async def update_todo(
 
     return todo
 
-    await db.commit()
-    await db.refresh(todo)
-
-    return todo
-
-
 async def delete_todo(
     todo_id: int,
     user: User,
