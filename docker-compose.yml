@@ -4,9 +4,6 @@ services:
     restart: unless-stopped
     mem_limit: 256m
 
-    ports:
-      - "5432:5432"
-
     environment:
       POSTGRES_DB: todo
       POSTGRES_USER: todo_user
