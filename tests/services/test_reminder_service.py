@@ -3,12 +3,13 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from app.models import ToDo, ReminderType
+from app.models import ReminderType, ToDo
 from app.services.reminder_service import (
     build_reminder,
     complete_reminder,
     get_due_reminders,
 )
+
 
 @pytest.mark.asyncio
 async def test_get_due_reminders_does_not_return_future_reminder():

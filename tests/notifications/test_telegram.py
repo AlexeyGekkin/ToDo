@@ -5,6 +5,7 @@ import pytest
 
 from app.notifications.telegram import send_reminder
 
+
 @pytest.mark.asyncio
 async def test_send_reminder_without_telegram_id():
     bot = SimpleNamespace(

@@ -10,6 +10,32 @@ from app.models.user_model import User
 from app.schemas.todo_schema import ToDoCreate, ToDoUpdate
 
 
+def validate_reminder_settings(
+    target_date: date | None,
+    deadline_time: time | None,
+    reminder_type: ReminderType,
+) -> None:
+    if (
+        reminder_type != ReminderType.NONE
+        and target_date is None
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Target date is required for reminders",
+        )
+
+    if (
+        reminder_type in (
+            ReminderType.DEADLINE,
+            ReminderType.BOTH,
+        )
+        and deadline_time is None
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail="Deadline time is required for deadline reminders",
+        )
+
 def calculate_remind_times(
     target_date: date | None,
     deadline_time: time | None,
@@ -80,6 +106,11 @@ async def create_todo(
     user: User,
     db: AsyncSession
 ):
+    validate_reminder_settings(
+        todo_data.target_date,
+        todo_data.deadline_time,
+        todo_data.reminder_type,
+    )
     morning_remind_at, deadline_remind_at = calculate_remind_times(
         todo_data.target_date,
         todo_data.deadline_time,
@@ -225,38 +256,68 @@ async def update_todo(
     todo_id: int,
     todo_data: ToDoUpdate,
     user: User,
-    db: AsyncSession
+    db: AsyncSession,
 ):
     todo = await get_user_todo(
         todo_id,
         user,
-        db
+        db,
     )
 
     data = todo_data.model_dump(
-        exclude_unset=True
+        exclude_unset=True,
     )
+
+    reminder_fields = {
+        "target_date",
+        "deadline_time",
+        "reminder_type",
+    }
+
+    reminder_changed = bool(
+        reminder_fields.intersection(data)
+    )
+
+    if reminder_changed:
+        target_date = data.get(
+            "target_date",
+            todo.target_date,
+        )
+
+        deadline_time = data.get(
+            "deadline_time",
+            todo.deadline_time,
+        )
+
+        reminder_type = data.get(
+            "reminder_type",
+            todo.reminder_type,
+        )
+
+        validate_reminder_settings(
+            target_date,
+            deadline_time,
+            reminder_type,
+        )
 
     for key, value in data.items():
         setattr(todo, key, value)
 
-    if any(
-        key in data
-        for key in (
-            "target_date",
-            "deadline_time",
-            "reminder_type"
-        )
-    ):
+    if reminder_changed:
         (
             todo.morning_remind_at,
-            todo.deadline_remind_at
+            todo.deadline_remind_at,
         ) = calculate_remind_times(
             todo.target_date,
             todo.deadline_time,
             todo.reminder_type,
             user.timezone,
         )
+
+    await db.commit()
+    await db.refresh(todo)
+
+    return todo
 
     await db.commit()
     await db.refresh(todo)

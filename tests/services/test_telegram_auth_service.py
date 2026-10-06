@@ -3,13 +3,12 @@ import hmac
 import json
 import time
 from unittest.mock import patch
-from urllib.parse import urlencode, parse_qs
+from urllib.parse import parse_qs, urlencode
 
 import pytest
 from fastapi import HTTPException
 
 from app.services.telegram_auth_service import validate_init_data
-
 
 TEST_BOT_TOKEN = "test_bot_token"
 
@@ -52,9 +51,8 @@ def test_validate_init_data_rejects_future_auth_date():
     with patch(
         "app.services.telegram_auth_service.BOT_TOKEN",
         TEST_BOT_TOKEN,
-    ):
-        with pytest.raises(HTTPException) as exc:
-            validate_init_data(init_data)
+    ), pytest.raises(HTTPException) as exc:
+        validate_init_data(init_data)
 
     assert exc.value.status_code == 401
 
@@ -88,9 +86,8 @@ def test_validate_init_data_rejects_invalid_signature():
     with patch(
         "app.services.telegram_auth_service.BOT_TOKEN",
         TEST_BOT_TOKEN,
-    ):
-        with pytest.raises(HTTPException) as exc:
-            validate_init_data(invalid_init_data)
+    ), pytest.raises(HTTPException) as exc:
+        validate_init_data(invalid_init_data)
 
     assert exc.value.status_code == 401
     assert exc.value.detail == "Invalid init_data signature"
@@ -104,9 +101,8 @@ def test_validate_init_data_rejects_expired_auth_date():
     with patch(
         "app.services.telegram_auth_service.BOT_TOKEN",
         TEST_BOT_TOKEN,
-    ):
-        with pytest.raises(HTTPException) as exc:
-            validate_init_data(init_data)
+    ), pytest.raises(HTTPException) as exc:
+        validate_init_data(init_data)
 
     assert exc.value.status_code == 401
     assert exc.value.detail == "Init data has expired"

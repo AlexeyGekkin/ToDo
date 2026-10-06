@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import get_db
@@ -26,7 +26,7 @@ router = APIRouter(
 
 @router.get("/profile")
 async def get_profile_webapp(
-    init_data: str,
+    init_data: str = Header(alias="X-Telegram-Init-Data"),
     db: AsyncSession = Depends(get_db),
 ):
     telegram_id = validate_init_data(init_data)
@@ -39,7 +39,7 @@ async def get_profile_webapp(
 
 @router.get("/todos")
 async def get_todos_for_webapp(
-    init_data: str,
+    init_data: str = Header(alias="X-Telegram-Init-Data"),
     db: AsyncSession = Depends(get_db),
 ):
     telegram_id = validate_init_data(init_data)
@@ -58,7 +58,7 @@ async def get_todos_for_webapp(
 @router.post("/todos")
 async def create_todo_webapp(
     todo: ToDoCreate,
-    init_data: str,
+    init_data: str = Header(alias="X-Telegram-Init-Data"),
     db: AsyncSession = Depends(get_db),
 ):
     telegram_id = validate_init_data(init_data)
@@ -79,7 +79,7 @@ async def create_todo_webapp(
 async def update_todo_webapp(
     todo_id: int,
     todo: ToDoUpdate,
-    init_data: str,
+    init_data: str = Header(alias="X-Telegram-Init-Data"),
     db: AsyncSession = Depends(get_db),
 ):
     telegram_id = validate_init_data(init_data)
@@ -99,7 +99,7 @@ async def update_todo_webapp(
 
 @router.delete("/account")
 async def delete_account_webapp(
-    init_data: str,
+    init_data: str = Header(alias="X-Telegram-Init-Data"),
     db: AsyncSession = Depends(get_db),
 ):
     telegram_id = validate_init_data(init_data)

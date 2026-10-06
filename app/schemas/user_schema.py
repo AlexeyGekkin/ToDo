@@ -4,13 +4,17 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     EmailStr,
+    Field,
     field_validator,
 )
 
 
 class UserCreate(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(
+        min_length=8,
+        max_length=128,
+    )
 
 
 class UserUpdate(BaseModel):

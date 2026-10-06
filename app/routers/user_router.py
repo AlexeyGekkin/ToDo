@@ -2,13 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+
 from app import schemas
 from app.dependencies import get_current_user, get_db
 from app.models import User
-from app.services.rate_limit_service import (
-    login_rate_limiter,
-    register_rate_limiter
-)
+from app.services.rate_limit_service import login_rate_limiter, register_rate_limiter
 from app.services.user_service import (
     authenticate_user,
     create_telegram_link,

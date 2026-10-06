@@ -4,9 +4,11 @@ from sqlalchemy import select
 
 from app.models import ToDo, User
 from app.services.telegram_service import (
+    delete_webapp_account,
     get_profile,
-    get_user_by_telegram_id, delete_webapp_account,
+    get_user_by_telegram_id,
 )
+
 
 @pytest.mark.asyncio
 async def test_get_user_by_telegram_id(db_session):

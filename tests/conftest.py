@@ -10,7 +10,6 @@ from sqlalchemy.pool import StaticPool
 from app.app_factory import create_app
 from app.database import Base
 from app.dependencies import get_db
-
 from app.services.rate_limit_service import (
     login_rate_limiter,
     register_rate_limiter,

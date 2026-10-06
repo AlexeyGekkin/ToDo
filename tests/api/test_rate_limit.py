@@ -1,62 +1,94 @@
-from collections import deque
-from time import monotonic
-
-from fastapi import HTTPException
+import pytest
 
 
-class RateLimiter:
-    def __init__(
-        self,
-        limit: int,
-        window_seconds: int,
-        detail: str,
-    ):
-        self.limit = limit
-        self.window_seconds = window_seconds
-        self.detail = detail
-        self.attempts: dict[str, deque[float]] = {}
+@pytest.mark.asyncio
+async def test_login_rate_limit(client):
+    payload = {
+        "email": "rate-login@example.com",
+        "password": "12345678",
+    }
 
-    def check(self, key: str) -> None:
-        now = monotonic()
+    response = await client.post(
+        "/users/register",
+        json=payload,
+    )
 
-        attempts = self.attempts.setdefault(
-            key,
-            deque(),
+    assert response.status_code == 200
+
+    for _ in range(5):
+        response = await client.post(
+            "/users/login",
+            json={
+                "email": payload["email"],
+                "password": "wrong_password",
+            },
         )
 
-        while (
-            attempts
-            and now - attempts[0] >= self.window_seconds
-        ):
-            attempts.popleft()
+        assert response.status_code == 401
 
-        if len(attempts) >= self.limit:
-            raise HTTPException(
-                status_code=429,
-                detail=self.detail,
-            )
+    response = await client.post(
+        "/users/login",
+        json={
+            "email": payload["email"],
+            "password": "wrong_password",
+        },
+    )
 
-    def add_attempt(self, key: str) -> None:
-        self.attempts.setdefault(
-            key,
-            deque(),
-        ).append(monotonic())
-
-    def reset(self, key: str) -> None:
-        self.attempts.pop(key, None)
-
-    def clear(self) -> None:
-        self.attempts.clear()
+    assert response.status_code == 429
+    assert response.json()["detail"] == (
+        "Too many login attempts"
+    )
 
 
-login_rate_limiter = RateLimiter(
-    limit=5,
-    window_seconds=60,
-    detail="Too many login attempts",
-)
+@pytest.mark.asyncio
+async def test_successful_login_resets_rate_limit(client):
+    payload = {
+        "email": "rate-reset@example.com",
+        "password": "12345678",
+    }
 
-register_rate_limiter = RateLimiter(
-    limit=5,
-    window_seconds=60,
-    detail="Too many registration attempts",
-)
+    response = await client.post(
+        "/users/register",
+        json=payload,
+    )
+
+    assert response.status_code == 200
+
+    for _ in range(4):
+        response = await client.post(
+            "/users/login",
+            json={
+                "email": payload["email"],
+                "password": "wrong_password",
+            },
+        )
+
+        assert response.status_code == 401
+
+    response = await client.post(
+        "/users/login",
+        json=payload,
+    )
+
+    assert response.status_code == 200
+
+    for _ in range(5):
+        response = await client.post(
+            "/users/login",
+            json={
+                "email": payload["email"],
+                "password": "wrong_password",
+            },
+        )
+
+        assert response.status_code == 401
+
+    response = await client.post(
+        "/users/login",
+        json={
+            "email": payload["email"],
+            "password": "wrong_password",
+        },
+    )
+
+    assert response.status_code == 429

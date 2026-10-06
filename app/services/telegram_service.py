@@ -48,8 +48,7 @@ async def get_profile(
     )
 
     res = await db.execute(stmt)
-    total, active = res.tuples().one()
-
+    total, active = res.one()
     return {
         "email": user.email,
         "active_count": active,

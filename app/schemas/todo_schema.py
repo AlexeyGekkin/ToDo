@@ -7,7 +7,10 @@ from app.models.todo_model import ReminderType
 
 class ToDoCreate(BaseModel):
     title: str = Field(max_length=200)
-    description: str | None = None
+    description: str | None = Field(
+        default=None,
+        max_length=3500,
+    )
     target_date: date | None = None
     deadline_time: time | None = None
     reminder_type: ReminderType = ReminderType.NONE
@@ -23,8 +26,14 @@ class ToDoCreate(BaseModel):
         return value
 
 class ToDoUpdate(BaseModel):
-    title: str | None = Field(default=None, max_length=200)
-    description: str | None = None
+    title: str | None = Field(
+        default=None,
+        max_length=200,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=3500,
+    )
     completed: bool | None = None
     target_date: date | None = None
     deadline_time: time | None = None

@@ -67,24 +67,82 @@ async def test_create_todo_both_reminders(client, auth_token):
 
 
 @pytest.mark.asyncio
-async def test_create_deadline_reminder_without_time(client, auth_token):
+async def test_create_deadline_reminder_without_time(
+    client,
+    auth_token,
+):
     response = await client.post(
         "/todos/",
         json={
             "title": "No deadline time",
             "target_date": "2099-10-01",
-            "reminder_type": "deadline"
+            "reminder_type": "deadline",
         },
-        headers={"Authorization": f"Bearer {auth_token}"},
+        headers={
+            "Authorization": f"Bearer {auth_token}"
+        },
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 422
+    assert response.json()["detail"] == (
+        "Deadline time is required for deadline reminders"
+    )
 
-    data = response.json()
+@pytest.mark.asyncio
+async def test_create_reminder_without_target_date(
+    client,
+    auth_token,
+):
+    response = await client.post(
+        "/todos/",
+        json={
+            "title": "No target date",
+            "reminder_type": "morning",
+        },
+        headers={
+            "Authorization": f"Bearer {auth_token}"
+        },
+    )
 
-    assert data["reminder_type"] == "deadline"
-    assert data["deadline_remind_at"] is None
+    assert response.status_code == 422
+    assert response.json()["detail"] == (
+        "Target date is required for reminders"
+    )
 
+@pytest.mark.asyncio
+async def test_update_cannot_remove_deadline_time(
+    client,
+    auth_token,
+):
+    headers = {
+        "Authorization": f"Bearer {auth_token}"
+    }
+
+    create_response = await client.post(
+        "/todos/",
+        json={
+            "title": "Deadline task",
+            "target_date": "2099-10-01",
+            "deadline_time": "18:30:00",
+            "reminder_type": "deadline",
+        },
+        headers=headers,
+    )
+
+    todo_id = create_response.json()["id"]
+
+    response = await client.patch(
+        f"/todos/{todo_id}",
+        json={
+            "deadline_time": None,
+        },
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == (
+        "Deadline time is required for deadline reminders"
+    )
 
 @pytest.mark.asyncio
 async def test_update_todo_reminder_type(client, auth_token):

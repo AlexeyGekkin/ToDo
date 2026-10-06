@@ -5,13 +5,14 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import User
+from app.models import ToDo, User
 from app.schemas import UserCreate
 from app.services.auth_service import (
     create_access_token,
     hash_password,
     verify_password,
 )
+from app.services.todo_service import calculate_remind_times
 
 
 async def create_telegram_link(
@@ -91,6 +92,42 @@ async def update_user_timezone(
     timezone: str,
     db: AsyncSession,
 ) -> User:
+    result = await db.execute(
+        select(ToDo).where(
+            ToDo.user_id == user.id,
+            (
+                ToDo.morning_remind_at.is_not(None)
+                | ToDo.deadline_remind_at.is_not(None)
+            ),
+        )
+    )
+
+    todos = result.scalars().all()
+
+    for todo in todos:
+        morning_pending = (
+            todo.morning_remind_at is not None
+        )
+        deadline_pending = (
+            todo.deadline_remind_at is not None
+        )
+
+        (
+            morning_remind_at,
+            deadline_remind_at,
+        ) = calculate_remind_times(
+            todo.target_date,
+            todo.deadline_time,
+            todo.reminder_type,
+            timezone,
+        )
+
+        if morning_pending:
+            todo.morning_remind_at = morning_remind_at
+
+        if deadline_pending:
+            todo.deadline_remind_at = deadline_remind_at
+
     user.timezone = timezone
 
     await db.commit()

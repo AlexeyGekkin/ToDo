@@ -1,11 +1,9 @@
-from sqlalchemy import text
-
-from app.dependencies import get_db
-
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import text
 
+from app.dependencies import get_db
 from app.routers import (
     telegram_router,
     todo_router,

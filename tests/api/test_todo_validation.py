@@ -23,6 +23,24 @@ async def test_create_todo_title_is_stripped(client, auth_token):
     assert response.json()["title"] == "Buy milk"
 
 @pytest.mark.asyncio
+async def test_create_todo_description_too_long(
+    client,
+    auth_token,
+):
+    response = await client.post(
+        "/todos/",
+        json={
+            "title": "Test",
+            "description": "a" * 3501,
+        },
+        headers={
+            "Authorization": f"Bearer {auth_token}"
+        },
+    )
+
+    assert response.status_code == 422
+
+@pytest.mark.asyncio
 async def test_update_todo_title_null(client, auth_token):
     create_response = await client.post(
         "/todos/",

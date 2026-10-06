@@ -229,19 +229,20 @@
         <div class="form-group">
             <label for="title">Название *</label>
             <input
-                type="text"
-                id="title"
-                required
-                placeholder="Например: Сдать отчёт"
+                    type="text"
+                    id="title"
+                    required
+                    placeholder="Например: Сдать отчёт"
             >
         </div>
 
         <div class="form-group">
             <label for="description">Описание</label>
             <textarea
-                id="description"
-                rows="2"
-                placeholder="Заметки..."
+                    id="description"
+                    rows="2"
+                    maxlength="3500"
+                    placeholder="Заметки..."
             ></textarea>
         </div>
 
@@ -281,8 +282,8 @@
         </div>
 
         <div
-            id="profEmail"
-            style="font-size: 18px; font-weight: bold; margin-top: 4px;"
+                id="profEmail"
+                style="font-size: 18px; font-weight: bold; margin-top: 4px;"
         >
             -
         </div>
@@ -294,8 +295,8 @@
         </div>
 
         <div
-            id="profActive"
-            style="font-size: 24px; font-weight: bold; color: var(--button); margin-top: 4px;"
+                id="profActive"
+                style="font-size: 24px; font-weight: bold; color: var(--button); margin-top: 4px;"
         >
             0
         </div>
@@ -307,17 +308,17 @@
         </div>
 
         <div
-            id="profCompleted"
-            style="font-size: 24px; font-weight: bold; margin-top: 4px;"
+                id="profCompleted"
+                style="font-size: 24px; font-weight: bold; margin-top: 4px;"
         >
             0
         </div>
     </div>
 
     <button
-        type="button"
-        class="danger-btn"
-        onclick="deleteAccount()"
+            type="button"
+            class="danger-btn"
+            onclick="deleteAccount()"
     >
         💀 Удалить аккаунт
     </button>
@@ -326,24 +327,24 @@
 <div class="nav-bar">
 
     <div
-        class="nav-item active"
-        onclick="switchTab('tasks')"
+            class="nav-item active"
+            onclick="switchTab('tasks')"
     >
         <span>📋</span>
         Задачи
     </div>
 
     <div
-        class="nav-item"
-        onclick="switchTab('create')"
+            class="nav-item"
+            onclick="switchTab('create')"
     >
         <span>➕</span>
         Создать
     </div>
 
     <div
-        class="nav-item"
-        onclick="switchTab('profile')"
+            class="nav-item"
+            onclick="switchTab('profile')"
     >
         <span>👤</span>
         Профиль
@@ -353,7 +354,17 @@
 
 <script>
     const tg = window.Telegram.WebApp;
+    function telegramHeaders(withJson = false) {
+    const headers = {
+        'X-Telegram-Init-Data': tg.initData
+    };
 
+    if (withJson) {
+        headers['Content-Type'] = 'application/json';
+    }
+
+    return headers;
+    }
     tg.expand();
 
     let allTodos = [];
@@ -516,7 +527,10 @@
     async function loadTasks() {
         try {
             const res = await fetch(
-                `/api/telegram/todos?init_data=${encodeURIComponent(tg.initData)}`
+            '/api/telegram/todos',
+            {
+            headers: telegramHeaders()
+            }
             );
 
             if (handleAuthError(res)) {
@@ -528,7 +542,6 @@
             }
 
             allTodos = await res.json();
-
             renderTasks();
 
         } catch (e) {
@@ -554,6 +567,11 @@
         renderTasks();
     }
 
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
     function renderTasks() {
         const list =
@@ -649,7 +667,7 @@
                     <div class="task-info">
 
                         <div class="task-title ${t.completed ? 'completed' : ''}">
-                            ${t.title}
+                            ${escapeHtml(t.title)}
                         </div>
 
                         ${
@@ -668,16 +686,14 @@
 
     async function toggleTask(id, completed) {
         const res = await fetch(
-            `/api/telegram/todos/${id}?init_data=${encodeURIComponent(tg.initData)}`,
-            {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
+            `/api/telegram/todos/${id}`,
+                {
+                    method: 'PATCH',
+                    headers: telegramHeaders(true),
+                    body: JSON.stringify({
                     completed: completed
                 })
-            }
+                }
         );
 
         if (handleAuthError(res)) {
@@ -690,7 +706,10 @@
 
     async function loadProfile() {
         const res = await fetch(
-            `/api/telegram/profile?init_data=${encodeURIComponent(tg.initData)}`
+            '/api/telegram/profile',
+            {
+            headers: telegramHeaders()
+            }
         );
 
         if (handleAuthError(res)) {
@@ -721,12 +740,13 @@
             return;
         }
 
-        const res = await fetch(
-            `/api/telegram/account?init_data=${encodeURIComponent(tg.initData)}`,
-            {
-                method: 'DELETE'
-            }
-        );
+    const res = await fetch(
+        '/api/telegram/account',
+        {
+            method: 'DELETE',
+            headers: telegramHeaders()
+        }
+    );
 
         if (res.ok) {
             alert("Аккаунт успешно удалён.");
@@ -794,14 +814,10 @@
 
 
             const res = await fetch(
-                `/api/telegram/todos?init_data=${encodeURIComponent(tg.initData)}`,
+                '/api/telegram/todos',
                 {
                     method: 'POST',
-
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-
+                    headers: telegramHeaders(true),
                     body: JSON.stringify(payload)
                 }
             );

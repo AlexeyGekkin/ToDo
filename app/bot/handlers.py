@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from html import escape
 
 from aiogram import F, Router, types
 from aiogram.filters import CommandObject, CommandStart
@@ -22,8 +23,7 @@ def format_todos(todos) -> str:
     for todo in todos:
         status = "✅" if todo.completed else "⬜"
 
-        line = f"{status} {todo.title}"
-
+        line = f"{status} {escape(todo.title)}"
         if todo.deadline_time:
             line += f" — до {todo.deadline_time.strftime('%H:%M')}"
 
@@ -85,10 +85,11 @@ async def cmd_start(
     await db.commit()
 
     await message.answer(
-        f"**Отлично, {message.from_user.first_name}!**\n\n"
-        f"Твой Telegram успешно привязан к аккаунту **{user.email}**.\n"
+        f"<b>Отлично, {escape(message.from_user.first_name)}!</b>\n\n"
+        f"Твой Telegram успешно привязан к аккаунту "
+        f"<b>{escape(user.email)}</b>.\n"
         f"Теперь ты можешь пользоваться приложением!",
-        parse_mode="Markdown",
+        parse_mode="HTML",
         reply_markup=get_main_keyboard(),
     )
 
@@ -154,7 +155,7 @@ async def profile(
 
     await message.answer(
         "👤 <b>Профиль</b>\n\n"
-        f"Email: {profile_data['email']}\n"
+        f"Email: {escape(profile_data['email'])}\n"
         f"Активных задач: {profile_data['active_count']}\n"
         f"Завершённых задач: {profile_data['completed_count']}",
         parse_mode="HTML",
