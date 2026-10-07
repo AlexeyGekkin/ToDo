@@ -556,6 +556,11 @@
             return;
         }
 
+        if (password.length < 8) {
+            error.textContent = 'Неверный email или пароль.';
+            return;
+        }
+
         const response = await fetch('/users/login', {
             method: 'POST',
             headers: {
