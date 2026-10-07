@@ -540,8 +540,21 @@
     }
 
     async function login() {
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
+        const error = document.getElementById('auth-error');
+
+        error.textContent = '';
+
+        if (!email || !document.getElementById('email').checkValidity()) {
+            error.textContent = 'Введите корректный email.';
+            return;
+        }
+
+        if (!password) {
+            error.textContent = 'Введите пароль.';
+            return;
+        }
 
         const response = await fetch('/users/login', {
             method: 'POST',
@@ -570,8 +583,26 @@
     }
 
     async function register() {
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
+        const error = document.getElementById('auth-error');
+
+        error.textContent = '';
+
+        if (!email || !document.getElementById('email').checkValidity()) {
+            error.textContent = 'Введите корректный email.';
+            return;
+        }
+
+        if (!password) {
+            error.textContent = 'Придумайте пароль.';
+            return;
+        }
+
+        if (password.length < 8) {
+            error.textContent = 'Пароль должен содержать не менее 8 символов.';
+            return;
+        }
 
         const response = await fetch('/users/register', {
             method: 'POST',
