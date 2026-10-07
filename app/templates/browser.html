@@ -464,6 +464,30 @@
         return false;
     }
 
+    function getErrorMessage(data, fallback) {
+        const detail = data?.detail;
+
+        if (Array.isArray(detail)) {
+            return detail
+                .map(item => item.msg || 'Некорректные данные')
+                .join('\n');
+        }
+
+        if (typeof detail !== 'string') {
+            return fallback;
+        }
+
+        const messages = {
+            'Invalid credentials': 'Неверный email или пароль.',
+            'Email already exists': 'Пользователь с таким email уже существует.',
+            'Too many login attempts': 'Слишком много попыток входа. Попробуйте позже.',
+            'Too many registration attempts':
+                'Слишком много попыток регистрации. Попробуйте позже.'
+        };
+
+        return messages[detail] || detail;
+    }
+
     function getTodayString() {
         const now = new Date();
 
@@ -534,7 +558,7 @@
 
         if (!response.ok) {
             document.getElementById('auth-error').textContent =
-                JSON.stringify(data.detail, null, 2);
+                getErrorMessage(data, 'Не удалось войти.');
 
             return;
         }
@@ -564,7 +588,7 @@
 
         if (!response.ok) {
             document.getElementById('auth-error').textContent =
-                JSON.stringify(data.detail, null, 2);
+                getErrorMessage(data, 'Не удалось зарегистрироваться.');
 
             return;
         }
@@ -584,7 +608,7 @@
         const data = await response.json();
 
         if (!response.ok) {
-            alert(JSON.stringify(data.detail, null, 2));
+            alert(getErrorMessage(data, 'Не удалось привязать Telegram.'));
             return;
         }
 
@@ -760,10 +784,9 @@
             const data = await response.json();
 
             alert(
-                JSON.stringify(
-                    data.detail,
-                    null,
-                    2
+                getErrorMessage(
+                    data,
+                    'Не удалось сохранить задачу.'
                 )
             );
 
